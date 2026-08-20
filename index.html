@@ -1,492 +1,631 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Archivo:wght@400;500;600;700;800&display=swap">
 <title>Sow Calendar</title>
 <meta name="description" content="Gregorian monthly calendar with the 1000-day (cycle-day) pig production count, configurable week start.">
-<meta name="theme-color" content="#1c6e4a">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sow Calendar">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f1f3f7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f121a">
+
 <style>
-  :root{
-    --bg:#f2f4f1;
-    --surface:#ffffff;
-    --surface-2:#f7f8f6;
-    --border:#dde2dc;
-    --fg:#1a2420;
-    --muted:#6b756e;
-    --muted-2:#98a099;
-    --accent:#1c6e4a;
-    --accent-fg:#ffffff;
-    --accent-soft:#e2f0e8;
-    --amber:#c8781f;
-    --today-ring:#c8781f;
-    --danger:#b3432c;
-    --shadow:0 1px 2px rgba(20,30,25,.06), 0 4px 16px rgba(20,30,25,.06);
-    --radius:14px;
+  :root {
+    --bg: #f1f3f7;
+    --surface: #ffffff;
+    --surface-2: #e7eaf1;
+    --text: #171a21;
+    --muted: #5b6172;
+    --border: #d7dbe4;
+    --work: #e05a2b;
+    --work-strong: #c94a1f;
+    --rest: #12897a;
+    --rest-strong: #0d6d61;
+    --ok: #b3791b;
+    --danger: #c73434;
+    --on-accent: #fff9f5;
+    --shadow: 0 1px 2px rgba(23,26,33,.04), 0 8px 24px -12px rgba(23,26,33,.18);
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#121712;
-      --surface:#1a211b;
-      --surface-2:#212a22;
-      --border:#2c362d;
-      --fg:#eef2ee;
-      --muted:#9aa89e;
-      --muted-2:#6c786f;
-      --accent:#4caf7d;
-      --accent-fg:#0d1510;
-      --accent-soft:#1f3327;
-      --amber:#e0a054;
-      --today-ring:#e0a054;
-      --danger:#e07a5f;
-      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f121a;
+      --surface: #1a1e29;
+      --surface-2: #232837;
+      --text: #eef0f5;
+      --muted: #8b93a6;
+      --border: #2a3040;
+      --work: #ff7847;
+      --work-strong: #ff8f5c;
+      --rest: #35d6c3;
+      --rest-strong: #57e0cf;
+      --ok: #e0a53d;
+      --danger: #ff6b6b;
+      --on-accent: #14100c;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
     }
   }
-  :root[data-theme="dark"]{
-    --bg:#121712;
-    --surface:#1a211b;
-    --surface-2:#212a22;
-    --border:#2c362d;
-    --fg:#eef2ee;
-    --muted:#9aa89e;
-    --muted-2:#6c786f;
-    --accent:#4caf7d;
-    --accent-fg:#0d1510;
-    --accent-soft:#1f3327;
-    --amber:#e0a054;
-    --today-ring:#e0a054;
-    --danger:#e07a5f;
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-  }
-  *{ box-sizing:border-box; }
-  html,body{ height:100%; }
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--fg);
-    font-family:'Inter', ui-sans-serif, system-ui, sans-serif;
-    -webkit-font-smoothing:antialiased;
-    padding-bottom:env(safe-area-inset-bottom);
-  }
-  button, input, select{ font-family:inherit; color:inherit; }
-  input, select{
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    border-radius:9px;
-    padding:8px 10px;
-    font-size:14px;
-  }
-  button{
-    cursor:pointer;
-    border:1px solid var(--border);
-    background:var(--surface);
-    border-radius:9px;
-    padding:8px 12px;
-    font-size:14px;
-    font-weight:600;
-    color:var(--fg);
-  }
-  button:active{ transform:translateY(1px); }
-  button.primary{
-    background:var(--accent);
-    color:var(--accent-fg);
-    border-color:var(--accent);
-  }
-  button.ghost{ background:transparent; border-color:transparent; }
-  button.icon{ padding:8px; width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; }
-
-  .app{ max-width:960px; margin:0 auto; padding:16px 16px 48px; }
-
-  header.top{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:12px; margin-bottom:16px; flex-wrap:wrap;
-  }
-  header.top h1{
-    font-family:'Fraunces', serif;
-    font-size:22px; font-weight:700; margin:0;
-    display:flex; align-items:center; gap:8px;
-  }
-  header.top h1 .pig{ font-size:24px; }
-  header.top .subtitle{ font-size:12px; color:var(--muted); margin-top:2px; }
-
-  .panel{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:16px;
-    margin-bottom:16px;
+  :root[data-theme="dark"] {
+    --bg: #0f121a;
+    --surface: #1a1e29;
+    --surface-2: #232837;
+    --text: #eef0f5;
+    --muted: #8b93a6;
+    --border: #2a3040;
+    --work: #ff7847;
+    --work-strong: #ff8f5c;
+    --rest: #35d6c3;
+    --rest-strong: #57e0cf;
+    --ok: #e0a53d;
+    --danger: #ff6b6b;
+    --on-accent: #14100c;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
   }
 
-  .settings-toggle{ display:flex; justify-content:flex-end; margin-bottom:0; }
-  .settings-toggle.opened{ margin-bottom:10px; }
-  .settings-body{ display:none; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
-  .settings-body.open{ display:grid; }
-  .field{ display:flex; flex-direction:column; gap:4px; }
-  .field label{ font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
-  .field .hint{ font-size:11px; color:var(--muted-2); font-weight:500; text-transform:none; letter-spacing:0; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+    overscroll-behavior-y: contain;
+  }
+  button, input, select { font-family: inherit; color: inherit; }
+  /* iOS Safari auto-zooms the page on focus if a text input renders
+     below 16px — keep every input at least that size so typing never
+     triggers it. */
+  input, select { font-size: 16px; }
+  button {
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  h1, h2, h3, p { margin: 0; text-wrap: balance; }
+  :focus-visible { outline: 2px solid var(--work); outline-offset: 2px; }
 
-  /* Month view */
-  .month-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap:10px; flex-wrap:wrap; }
-  .month-head .title{ font-family:'Fraunces', serif; font-size:20px; font-weight:600; min-width:180px; text-align:center; }
-  .month-head .navgrp{ display:flex; gap:6px; align-items:center; }
-  .month-sub{ text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px; }
-
-  .weekday-row, .month-grid{
-    display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
-  }
-  .weekday-row{ margin-bottom:6px; }
-  .weekday-row div{
-    text-align:center; font-size:11px; font-weight:700; color:var(--muted-2);
-    text-transform:uppercase; letter-spacing:.04em; padding:4px 0;
-  }
-  .day-cell{
-    min-height:74px;
-    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    gap:2px; padding:8px 3px 6px;
-    border-radius:10px;
-    background:var(--surface-2); color:var(--fg);
-    position:relative;
-  }
-  .day-cell .datenum{ font-size:15px; font-weight:700; line-height:1; }
-  .day-cell .cycletag{
-    font-size:10.5px; font-weight:600; color:var(--muted);
-    letter-spacing:.01em; font-variant-numeric:tabular-nums;
-  }
-  .day-cell.outside{ opacity:.4; }
-  .day-cell.today{ box-shadow:0 0 0 2px var(--today-ring) inset; }
-  .day-cell.today .datenum{ color:var(--amber); }
-  .day-cell.today .cycletag{ color:var(--amber); }
-  .day-cell.weekend .datenum{ color:var(--muted); }
-
-  .marks{ display:flex; flex-wrap:wrap; gap:2px; margin-top:auto; justify-content:center; }
-  .mark{
-    font-size:8.5px; font-weight:800; color:#fff;
-    border-radius:4px; padding:1px 3px; line-height:1.3;
+  .app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--bg);
+    position: relative;
   }
 
-  .jump-form{ display:flex; gap:6px; align-items:center; }
-  .jump-form input{ width:80px; font-variant-numeric:tabular-nums; }
-
-  .legend{ display:flex; flex-direction:column; gap:8px; margin-top:4px; }
-  .batch-row{
-    display:flex; align-items:center; gap:10px;
-    background:var(--surface-2); border:1px solid var(--border);
-    border-radius:10px; padding:8px 10px; font-size:13px; flex-wrap:wrap;
+  /* ---------- Topbar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(14px, env(safe-area-inset-top)) 16px 10px;
+    flex: 0 0 auto;
   }
-  .swatch{ width:12px; height:12px; border-radius:4px; flex:none; }
-  .batch-row .label{ font-weight:700; flex:1 1 auto; min-width:80px; }
-  .batch-row .dates{ color:var(--muted); font-size:12px; }
-  .batch-row button{ margin-left:auto; }
-
-  .add-batch{ display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; margin-top:12px; }
-  .add-batch .field{ min-width:120px; }
-  .color-picks{ display:flex; gap:6px; }
-  .color-pick{
-    width:22px; height:22px; border-radius:6px; border:2px solid transparent; cursor:pointer;
+  .brand { display: flex; align-items: baseline; gap: .4rem; }
+  .brand-mark { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.35rem; letter-spacing: .01em; }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    transition: color .15s ease, border-color .15s ease;
   }
-  .color-pick.selected{ border-color:var(--fg); }
+  .topbar-icon { width: 19px; height: 19px; }
 
-  .key-legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:10px; }
-  .key-legend span{ display:inline-flex; align-items:center; gap:5px; }
-  .key-legend i{ width:14px; height:14px; border-radius:4px; background:var(--muted-2); display:inline-block; font-style:normal; color:#fff; font-size:9px; font-weight:800; text-align:center; line-height:14px; }
+  /* ---------- Views ---------- */
+  .view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  [hidden] { display: none !important; }
 
-  h2.section-title{ font-size:14px; font-weight:700; margin:0 0 10px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  /* ---------- Calendar view ---------- */
+  .cal-view { overflow-y: auto; padding: 4px 16px calc(20px + env(safe-area-inset-bottom)); gap: 16px; display: flex; flex-direction: column; }
 
-  footer.hint{ text-align:center; color:var(--muted-2); font-size:12px; margin-top:20px; }
-
-  @media (max-width:520px){
-    .day-cell{ min-height:56px; padding:5px 2px 4px; }
-    .day-cell .datenum{ font-size:13px; }
-    .day-cell .cycletag{ font-size:9px; }
-    .month-head .title{ min-width:0; font-size:17px; }
-    .mark{ font-size:7.5px; }
+  .month-nav {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
   }
+  .month-title { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.5rem; text-align: center; flex: 1; }
+  .month-nav-btns { display: flex; gap: 8px; }
+  .today-chip { padding: 0 14px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); font-weight: 700; font-size: .82rem; }
+
+  .today-readout { text-align: center; font-size: .78rem; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .today-readout strong { color: var(--text); font-weight: 800; }
+
+  .jump-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px 10px;
+  }
+  .jump-row label { font-size: .74rem; color: var(--muted); font-weight: 600; flex: 0 0 auto; }
+  .jump-row input {
+    flex: 1; min-width: 0; border: 1px solid var(--border); background: var(--surface-2);
+    border-radius: 10px; padding: 8px 10px; font-size: .9rem; font-weight: 700;
+    font-variant-numeric: tabular-nums; text-align: center;
+  }
+  .jump-row button { padding: 0 14px; height: 36px; border-radius: 10px; border: 1px solid var(--work); background: var(--work); color: var(--on-accent); font-weight: 700; font-size: .82rem; }
+
+  .weekday-row, .month-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+  .weekday-row div {
+    text-align: center; font-size: .66rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em; padding: 2px 0;
+  }
+  .day-cell {
+    min-height: 68px;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    gap: 2px; padding: 7px 2px 6px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    position: relative;
+  }
+  .day-cell .datenum { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.05rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .day-cell .cycletag { font-size: .62rem; font-weight: 700; color: var(--muted); letter-spacing: .01em; font-variant-numeric: tabular-nums; }
+  .day-cell.outside { opacity: .38; }
+  .day-cell.today { box-shadow: 0 0 0 2px var(--work) inset; }
+  .day-cell.today .datenum,
+  .day-cell.today .cycletag { color: var(--work); }
+  .day-cell.weekend:not(.today) .datenum { color: var(--muted); }
+
+  .marks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: auto; justify-content: center; }
+  .mark {
+    font-size: .58rem; font-weight: 800; color: #fff;
+    border-radius: 4px; padding: 1px 3px; line-height: 1.3;
+  }
+
+  .key-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: .72rem; color: var(--muted); font-weight: 600; }
+  .key-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .key-legend i { width: 13px; height: 13px; border-radius: 4px; display: inline-block; font-style: normal; color: #fff; font-size: .55rem; font-weight: 800; text-align: center; line-height: 13px; }
+
+  /* ---------- Settings view ---------- */
+  .settings-view { overflow-y: auto; padding: 4px 16px calc(20px + env(safe-area-inset-bottom)); gap: 20px; display: flex; flex-direction: column; }
+  .settings-header { padding: 10px 2px 0; }
+  .settings-header h1 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.6rem; }
+  .settings-header p { color: var(--muted); font-size: .85rem; margin-top: 2px; }
+
+  .section-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .13em; font-weight: 700; color: var(--muted); padding: 0 2px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+
+  .stepper-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; gap: 10px; }
+  .stepper-row + .stepper-row { border-top: 1px solid var(--border); }
+  .stepper-row .label { font-weight: 600; font-size: .92rem; }
+  .stepper-row .caption { font-size: .74rem; color: var(--muted); margin-top: 1px; }
+  .stepper { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+  .stepper button {
+    width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface-2); box-shadow: 0 1px 0 0 color-mix(in srgb, var(--border) 80%, transparent);
+    font-size: 1.15rem; line-height: 1; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; color: var(--text);
+    transition: transform .08s ease, background .08s ease, border-color .08s ease, box-shadow .08s ease;
+  }
+  .stepper button:active {
+    background: color-mix(in srgb, var(--work) 18%, var(--surface-2));
+    border-color: var(--work); box-shadow: none; transform: scale(.88);
+  }
+  .stepper .value { min-width: 68px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; font-size: .95rem; }
+
+  .field-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; gap: 10px; }
+  .field-row + .field-row { border-top: 1px solid var(--border); }
+  .field-row .label { font-weight: 600; font-size: .92rem; }
+  .field-row .caption { font-size: .74rem; color: var(--muted); margin-top: 1px; }
+  .field-row input[type="date"] {
+    border: 1px solid var(--border); background: var(--surface-2); border-radius: 10px;
+    padding: 7px 9px; font-weight: 700; font-size: .85rem;
+  }
+
+  .seg-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 14px; }
+  .seg-btn {
+    padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-weight: 700; font-size: .78rem;
+  }
+  .seg-btn.active { background: var(--work); border-color: var(--work); color: var(--on-accent); }
+
+  .name-row { display: flex; gap: 8px; }
+  .name-row input {
+    flex: 1; min-width: 0; padding: 12px 14px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--surface); font-size: 16px; font-weight: 600;
+  }
+  .name-row input::placeholder { color: var(--muted); font-weight: 500; }
+  .save-btn {
+    padding: 0 18px; border-radius: 14px; border: 1px solid var(--work);
+    background: var(--work); color: var(--on-accent); font-weight: 700; font-size: .88rem; white-space: nowrap;
+  }
+  .save-btn:active { transform: scale(.97); }
+
+  .date-row { display: flex; gap: 8px; align-items: center; }
+  .date-row input[type="date"] {
+    flex: 1; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border);
+    background: var(--surface); font-weight: 600; font-size: .92rem;
+  }
+
+  .color-picks { display: flex; gap: 6px; flex-wrap: wrap; }
+  .color-pick { width: 26px; height: 26px; border-radius: 8px; border: 2px solid transparent; }
+  .color-pick.selected { border-color: var(--text); }
+
+  .preset-list { display: flex; flex-direction: column; gap: 8px; }
+  .preset-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+  .preset-swatch { width: 12px; height: 12px; border-radius: 4px; flex: 0 0 auto; }
+  .preset-main { min-width: 0; flex: 1; text-align: left; }
+  .preset-main .pname { font-weight: 700; font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .preset-main .pmeta { font-size: .72rem; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .preset-del {
+    width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--muted); font-size: .95rem; flex: 0 0 auto;
+  }
+  .preset-del.confirm { background: var(--danger); border-color: var(--danger); color: #fff; font-size: .68rem; font-weight: 700; width: auto; padding: 0 10px; }
+  .empty-note { color: var(--muted); font-size: .82rem; padding: 6px 2px; }
 </style>
-</head>
-<body>
-<div class="app">
 
-  <header class="top">
-    <div>
-      <h1><span class="pig">🐖</span> Sow Calendar</h1>
-      <div class="subtitle">Gregorian + 1000-day cycle count</div>
+<div class="app" id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" id="topbarTitle">Sow Calendar</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="settingsBtn" aria-label="Open settings">
+        <svg class="topbar-icon" id="settingsIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+        </svg>
+      </button>
     </div>
   </header>
 
-  <!-- ===== Settings ===== -->
-  <div class="panel">
-    <div class="settings-toggle" id="settingsToggleWrap">
-      <button class="ghost icon" id="settingsBtn" title="Settings" aria-label="Settings">⚙️</button>
-    </div>
-    <div class="settings-body" id="settingsBody">
-      <div class="field">
-        <label for="weekStartSel">Week starts on</label>
-        <select id="weekStartSel">
-          <option value="0">Sunday</option>
-          <option value="1">Monday</option>
-          <option value="2">Tuesday</option>
-          <option value="3">Wednesday</option>
-          <option value="4">Thursday</option>
-          <option value="5">Friday</option>
-          <option value="6">Saturday</option>
-        </select>
+  <main class="view cal-view" id="calView">
+    <div class="month-nav">
+      <div class="month-nav-btns">
+        <button class="icon-btn" id="mPrev" aria-label="Previous month">
+          <svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
       </div>
-      <div class="field">
-        <label for="themeSel">Theme</label>
-        <select id="themeSel">
-          <option value="system">System</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="epochInp">Cycle 00 / Day 000 date</label>
-        <input type="date" id="epochInp">
-        <span class="hint">Reference date the 1000-day count starts from</span>
-      </div>
-      <div class="field">
-        <label for="gestationInp">Gestation (days)</label>
-        <input type="number" id="gestationInp" min="90" max="130" step="1">
-      </div>
-      <div class="field">
-        <label for="lactationInp">Lactation → weaning (days)</label>
-        <input type="number" id="lactationInp" min="14" max="35" step="1">
-      </div>
-      <div class="field">
-        <label for="wsiInp">Wean-to-service interval (days)</label>
-        <input type="number" id="wsiInp" min="3" max="14" step="1">
+      <div class="month-title" id="mTitle">Month Year</div>
+      <div class="month-nav-btns">
+        <button class="icon-btn" id="mNext" aria-label="Next month">
+          <svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
       </div>
     </div>
-  </div>
+    <div class="month-nav" style="justify-content:center; gap:14px;">
+      <button class="today-chip" id="mToday">Today</button>
+      <div class="today-readout" id="mCycleToday"></div>
+    </div>
 
-  <!-- ===== Breeding batches ===== -->
-  <div class="panel">
-    <h2 class="section-title">Breeding batches</h2>
-    <div class="legend" id="batchList"></div>
-    <div class="add-batch">
-      <div class="field">
-        <label for="batchLabel">Label</label>
-        <input type="text" id="batchLabel" placeholder="e.g. Group A" maxlength="24" style="width:140px;">
-      </div>
-      <div class="field">
-        <label for="batchDate">First service date</label>
-        <input type="date" id="batchDate">
-      </div>
-      <div class="field">
-        <label>Color</label>
-        <div class="color-picks" id="colorPicks"></div>
-      </div>
-      <button class="primary" id="addBatchBtn">Add batch</button>
-    </div>
-    <div class="key-legend">
-      <span><i style="background:var(--accent)">S</i> Service / AI</span>
-      <span><i style="background:var(--danger)">F</i> Farrowing (~term)</span>
-      <span><i style="background:var(--amber)">W</i> Weaning</span>
-    </div>
-  </div>
+    <form class="jump-row" id="jumpForm">
+      <label for="jumpInp">Jump to cycle-day</label>
+      <input type="text" id="jumpInp" placeholder="20-051" pattern="\d{1,2}-\d{1,3}" inputmode="numeric">
+      <button type="submit">Go</button>
+    </form>
 
-  <!-- ===== Monthly calendar (Gregorian + 1000-day) ===== -->
-  <section id="view-month" class="panel">
-    <div class="month-head">
-      <button class="icon ghost" id="mPrev" aria-label="Previous month">‹</button>
-      <div class="title" id="mTitle">Month Year</div>
-      <div class="navgrp">
-        <button id="mToday">Today</button>
-        <button class="icon ghost" id="mNext" aria-label="Next month">›</button>
-      </div>
-    </div>
-    <div class="month-head" style="margin-top:2px;">
-      <form class="jump-form" id="jumpForm">
-        <label for="jumpInp" style="font-size:12px;color:var(--muted);">Jump to cycle-day</label>
-        <input type="text" id="jumpInp" placeholder="20-051" pattern="\d{1,2}-\d{1,3}">
-        <button type="submit">Go</button>
-      </form>
-      <div class="progress" id="mCycleToday" style="font-size:12px;color:var(--muted);"></div>
-    </div>
     <div class="weekday-row" id="mWeekdays"></div>
     <div class="month-grid" id="mGrid"></div>
-  </section>
 
-  <footer class="hint">Settings are saved automatically in this browser.</footer>
+    <div class="key-legend">
+      <span><i style="background:var(--rest)">S</i> Service / AI</span>
+      <span><i style="background:var(--danger)">F</i> Farrowing (~term)</span>
+      <span><i style="background:var(--ok)">W</i> Weaning</span>
+    </div>
+  </main>
+
+  <main class="view settings-view" id="settingsView" hidden>
+    <div class="settings-header">
+      <h1>Settings</h1>
+      <p>Calendar display, the 1000-day count, and breeding batches.</p>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Week starts on</div>
+      <div class="card">
+        <div class="seg-row" id="weekStartRow"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Theme</div>
+      <div class="card">
+        <div class="seg-row" id="themeRow"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">1000-day count</div>
+      <div class="card">
+        <div class="field-row">
+          <div>
+            <div class="label">Cycle 00 / Day 000 date</div>
+            <div class="caption">Reference date the CC-DDD count starts from</div>
+          </div>
+          <input type="date" id="epochInp">
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Breeding cycle timing</div>
+      <div class="card">
+        <div class="stepper-row">
+          <div>
+            <div class="label">Gestation</div>
+            <div class="caption">Service → farrowing</div>
+          </div>
+          <div class="stepper" data-field="gestation">
+            <button data-dir="-1" aria-label="Decrease gestation days">−</button>
+            <span class="value" id="gestationVal">114d</span>
+            <button data-dir="1" aria-label="Increase gestation days">+</button>
+          </div>
+        </div>
+        <div class="stepper-row">
+          <div>
+            <div class="label">Lactation</div>
+            <div class="caption">Farrowing → weaning</div>
+          </div>
+          <div class="stepper" data-field="lactation">
+            <button data-dir="-1" aria-label="Decrease lactation days">−</button>
+            <span class="value" id="lactationVal">21d</span>
+            <button data-dir="1" aria-label="Increase lactation days">+</button>
+          </div>
+        </div>
+        <div class="stepper-row">
+          <div>
+            <div class="label">Wean-to-service</div>
+            <div class="caption">Weaning → next service</div>
+          </div>
+          <div class="stepper" data-field="wsi">
+            <button data-dir="-1" aria-label="Decrease wean-to-service days">−</button>
+            <span class="value" id="wsiVal">5d</span>
+            <button data-dir="1" aria-label="Increase wean-to-service days">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Add a breeding batch</div>
+      <div class="card" style="padding:14px; display:flex; flex-direction:column; gap:10px;">
+        <div class="name-row">
+          <input type="text" id="batchLabel" placeholder="e.g. Group A" maxlength="24">
+          <button class="save-btn" id="addBatchBtn">Add</button>
+        </div>
+        <div class="date-row">
+          <input type="date" id="batchDate">
+        </div>
+        <div class="color-picks" id="colorPicks"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Breeding batches</div>
+      <div class="preset-list" id="batchList"></div>
+      <div class="empty-note" id="batchEmptyNote" hidden>No batches yet — add a first-service date above to project farrowing, weaning, and repeat cycles on the calendar.</div>
+    </div>
+  </main>
+
 </div>
 
 <script>
-(function(){
+(function () {
   "use strict";
 
-  /* ---------- storage ---------- */
+  // ---------- Persistence ----------
   var LS_SETTINGS = "sowcal.settings.v2";
   var LS_BATCHES  = "sowcal.batches.v2";
+
+  function loadJSON(key, fallback) {
+    try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch (e) { return fallback; }
+  }
+  function saveJSON(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
 
   var DAYNAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   var MONTHNAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   var MONTHSHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  var COLORS = ["#1c6e4a","#c8781f","#2f6fa0","#8a4fb0","#b3432c","#3a8f8f","#a08a1c","#5a5fc7"];
+  var COLORS = ["#e05a2b","#12897a","#b3791b","#2f6fa0","#8a4fb0","#3a8f8f","#5a5fc7","#c73434"];
 
   // Default epoch: inferred so that "today" reads as cycle-day 20-051, per the
   // reference calendar this app is matching. Adjust in Settings if your
   // farm's actual Cycle 00 / Day 000 date differs.
   var DEFAULT_EPOCH = "1971-09-27";
 
-  function defaultSettings(){
-    return {
-      weekStart: 1,          // Monday default
-      theme: "system",
-      epoch: DEFAULT_EPOCH,
-      gestation: 114,
-      lactation: 21,
-      wsi: 5
-    };
+  var LIMITS = {
+    gestation: { min: 90, max: 130, step: 1 },
+    lactation: { min: 14, max: 35, step: 1 },
+    wsi:       { min: 3,  max: 14,  step: 1 }
+  };
+
+  function defaultSettings() {
+    return { weekStart: 1, theme: "system", epoch: DEFAULT_EPOCH, gestation: 114, lactation: 21, wsi: 5 };
+  }
+  function clamp(val, field) {
+    var l = LIMITS[field];
+    return Math.max(l.min, Math.min(l.max, val));
   }
 
-  function loadSettings(){
-    try{
-      var raw = localStorage.getItem(LS_SETTINGS);
-      if(!raw) return defaultSettings();
-      var parsed = JSON.parse(raw);
-      return Object.assign(defaultSettings(), parsed);
-    }catch(e){ return defaultSettings(); }
-  }
-  function saveSettings(){ localStorage.setItem(LS_SETTINGS, JSON.stringify(state.settings)); }
+  var settings = Object.assign(defaultSettings(), loadJSON(LS_SETTINGS, {}));
+  var batches = loadJSON(LS_BATCHES, []);
 
-  function loadBatches(){
-    try{
-      var raw = localStorage.getItem(LS_BATCHES);
-      if(!raw) return [];
-      return JSON.parse(raw);
-    }catch(e){ return []; }
-  }
-  function saveBatches(){ localStorage.setItem(LS_BATCHES, JSON.stringify(state.batches)); }
+  function persistSettings() { saveJSON(LS_SETTINGS, settings); }
+  function persistBatches() { saveJSON(LS_BATCHES, batches); }
 
-  /* ---------- date helpers (local time, no TZ surprises) ---------- */
-  function isoDate(dt){
-    var y=dt.getFullYear(), m=String(dt.getMonth()+1).padStart(2,"0"), day=String(dt.getDate()).padStart(2,"0");
-    return y+"-"+m+"-"+day;
+  // ---------- date helpers (local time, no TZ surprises) ----------
+  function isoDate(dt) {
+    var y = dt.getFullYear(), m = String(dt.getMonth()+1).padStart(2,"0"), d = String(dt.getDate()).padStart(2,"0");
+    return y+"-"+m+"-"+d;
   }
-  function parseISO(s){
-    var parts = s.split("-").map(Number);
-    return new Date(parts[0], parts[1]-1, parts[2]);
-  }
-  function addDays(dt, n){ return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n); }
-  function isSameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
-  function daysBetween(a,b){ // b - a, in whole days
+  function parseISO(s) { var p = s.split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+  function addDays(dt, n) { return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+n); }
+  function isSameDay(a,b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+  function daysBetween(a,b) {
     var ta = new Date(a.getFullYear(),a.getMonth(),a.getDate()).getTime();
     var tb = new Date(b.getFullYear(),b.getMonth(),b.getDate()).getTime();
     return Math.round((tb-ta)/86400000);
   }
-  function weekdayOffset(dowOfDate, weekStart){
-    return (dowOfDate - weekStart + 7) % 7;
-  }
-  function orderedWeekdayLabels(weekStart){
-    var out=[];
-    for(var i=0;i<7;i++) out.push(DAYNAMES[(weekStart+i)%7]);
+  function weekdayOffset(dow, weekStart) { return (dow - weekStart + 7) % 7; }
+  function orderedWeekdayLabels(weekStart) {
+    var out = [];
+    for (var i=0;i<7;i++) out.push(DAYNAMES[(weekStart+i)%7]);
     return out;
   }
 
-  /* ---------- 1000-day cycle-day formatting ---------- */
+  // ---------- 1000-day cycle-day formatting ----------
   // Continuous count of days since the configured epoch (Cycle 00 / Day 000),
   // formatted as CC-DDD: cycle = which block of 1000 days, day = 000-999
   // position within it. Wraps every 100 cycles (100,000 days, ~274 years).
-  function cycleDayIndex(epochDate, date){ return daysBetween(epochDate, date); }
-  function cycleDayLabel(idx){
+  function cycleDayIndex(epochDate, date) { return daysBetween(epochDate, date); }
+  function pad(n, width) { var s = String(Math.abs(n)); while (s.length < width) s = "0"+s; return (n<0?"-":"")+s; }
+  function cycleDayLabel(idx) {
     var cycle = Math.floor(idx/1000) % 100;
     var day = ((idx % 1000) + 1000) % 1000;
-    if(cycle < 0) cycle += 100;
+    if (cycle < 0) cycle += 100;
     return pad(cycle,2) + "-" + pad(day,3);
   }
-  function pad(n,width){
-    var s = String(Math.abs(n));
-    while(s.length < width) s = "0" + s;
-    return (n<0?"-":"") + s;
-  }
-  function parseCycleDay(str){
+  function parseCycleDay(str) {
     var m = /^\s*(\d{1,2})\s*-\s*(\d{1,3})\s*$/.exec(str);
-    if(!m) return null;
+    if (!m) return null;
     var cycle = Number(m[1]), day = Number(m[2]);
-    if(day > 999) return null;
+    if (day > 999) return null;
     return cycle*1000 + day;
   }
-  function dateFromCycleDayIndex(epochDate, idx){ return addDays(epochDate, idx); }
-
-  /* ---------- state ---------- */
-  var state = {
-    settings: loadSettings(),
-    batches: loadBatches(),
-    monthCursor: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-  };
 
   var today = new Date(); today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  var monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
 
-  /* ---------- theme ---------- */
-  function applyTheme(){
-    var t = state.settings.theme;
-    if(t === "system") document.documentElement.removeAttribute("data-theme");
+  // ---------- theme ----------
+  function applyTheme() {
+    var t = settings.theme;
+    if (t === "system") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
   }
 
-  /* ---------- settings panel ---------- */
+  // ---------- view switching ----------
+  var app = document.getElementById("app");
+  var calView = document.getElementById("calView");
+  var settingsView = document.getElementById("settingsView");
   var settingsBtn = document.getElementById("settingsBtn");
-  var settingsBody = document.getElementById("settingsBody");
-  var settingsToggleWrap = document.getElementById("settingsToggleWrap");
-  settingsBtn.addEventListener("click", function(){
-    settingsBody.classList.toggle("open");
-    settingsToggleWrap.classList.toggle("opened", settingsBody.classList.contains("open"));
-  });
+  var settingsIcon = document.getElementById("settingsIcon");
+  var topbarTitle = document.getElementById("topbarTitle");
 
-  var weekStartSel = document.getElementById("weekStartSel");
-  var themeSel = document.getElementById("themeSel");
-  var epochInp = document.getElementById("epochInp");
-  var gestationInp = document.getElementById("gestationInp");
-  var lactationInp = document.getElementById("lactationInp");
-  var wsiInp = document.getElementById("wsiInp");
+  var GEAR_ICON = '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>';
+  var BACK_ICON = '<path d="M15 5l-7 7 7 7"/>';
 
-  weekStartSel.value = String(state.settings.weekStart);
-  themeSel.value = state.settings.theme;
-  epochInp.value = state.settings.epoch;
-  gestationInp.value = state.settings.gestation;
-  lactationInp.value = state.settings.lactation;
-  wsiInp.value = state.settings.wsi;
-
-  weekStartSel.addEventListener("change", function(){
-    state.settings.weekStart = Number(weekStartSel.value);
-    saveSettings();
-    renderMonth();
-  });
-  themeSel.addEventListener("change", function(){
-    state.settings.theme = themeSel.value;
-    saveSettings();
-    applyTheme();
-  });
-  function clamp(n,lo,hi){ return Math.max(lo, Math.min(hi, n)); }
-  function onCfgChange(){
-    state.settings.epoch = epochInp.value || state.settings.epoch;
-    state.settings.gestation = clamp(Number(gestationInp.value)||114, 90, 130);
-    state.settings.lactation = clamp(Number(lactationInp.value)||21, 14, 35);
-    state.settings.wsi = clamp(Number(wsiInp.value)||5, 3, 14);
-    saveSettings();
-    renderBatchList();
-    renderMonth();
+  function showView(v) {
+    calView.hidden = v !== "cal";
+    settingsView.hidden = v !== "settings";
+    if (v === "settings") {
+      settingsIcon.innerHTML = BACK_ICON;
+      settingsBtn.setAttribute("aria-label", "Back to calendar");
+      topbarTitle.textContent = "Sow Calendar";
+    } else {
+      settingsIcon.innerHTML = GEAR_ICON;
+      settingsBtn.setAttribute("aria-label", "Open settings");
+      renderMonth();
+    }
   }
-  [epochInp,gestationInp,lactationInp,wsiInp].forEach(function(el){
-    el.addEventListener("change", onCfgChange);
+  settingsBtn.addEventListener("click", function () {
+    showView(settingsView.hidden ? "settings" : "cal");
   });
 
-  /* ---------- batches ---------- */
+  // ---------- Settings view: week start + theme segmented controls ----------
+  var weekStartRow = document.getElementById("weekStartRow");
+  DAYNAMES.forEach(function (name, idx) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "seg-btn";
+    b.textContent = name;
+    b.addEventListener("click", function () {
+      settings.weekStart = idx;
+      persistSettings();
+      syncWeekStartRow();
+    });
+    weekStartRow.appendChild(b);
+  });
+  function syncWeekStartRow() {
+    Array.prototype.forEach.call(weekStartRow.children, function (btn, idx) {
+      btn.classList.toggle("active", idx === settings.weekStart);
+    });
+  }
+
+  var themeRow = document.getElementById("themeRow");
+  [["system","System"],["light","Light"],["dark","Dark"]].forEach(function (pair) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "seg-btn";
+    b.textContent = pair[1];
+    b.addEventListener("click", function () {
+      settings.theme = pair[0];
+      persistSettings();
+      applyTheme();
+      syncThemeRow();
+    });
+    themeRow.appendChild(b);
+  });
+  function syncThemeRow() {
+    Array.prototype.forEach.call(themeRow.children, function (btn, idx) {
+      btn.classList.toggle("active", ["system","light","dark"][idx] === settings.theme);
+    });
+  }
+
+  var epochInp = document.getElementById("epochInp");
+  epochInp.value = settings.epoch;
+  epochInp.addEventListener("change", function () {
+    settings.epoch = epochInp.value || settings.epoch;
+    persistSettings();
+  });
+
+  // ---------- Settings view: breeding-timing steppers ----------
+  var gestationVal = document.getElementById("gestationVal");
+  var lactationVal = document.getElementById("lactationVal");
+  var wsiVal = document.getElementById("wsiVal");
+  function syncTimingFields() {
+    gestationVal.textContent = settings.gestation + "d";
+    lactationVal.textContent = settings.lactation + "d";
+    wsiVal.textContent = settings.wsi + "d";
+    renderBatchList();
+  }
+  function bumpField(field, dir) {
+    var l = LIMITS[field];
+    settings[field] = clamp(settings[field] + dir*l.step, field);
+    persistSettings();
+    syncTimingFields();
+  }
+  document.querySelectorAll(".stepper").forEach(function (group) {
+    var field = group.dataset.field;
+    var minus = group.querySelector('[data-dir="-1"]');
+    var plus = group.querySelector('[data-dir="1"]');
+    var holdTimer, holdInterval;
+    function startHold(dir) {
+      bumpField(field, dir);
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(function () {
+        clearInterval(holdInterval);
+        holdInterval = setInterval(function () { bumpField(field, dir); }, 90);
+      }, 450);
+    }
+    function stopHold() { clearTimeout(holdTimer); clearInterval(holdInterval); }
+    [[minus,-1],[plus,1]].forEach(function (pair) {
+      var btn = pair[0], dir = pair[1];
+      btn.addEventListener("pointerdown", function (e) { e.preventDefault(); startHold(dir); });
+      btn.addEventListener("pointerup", stopHold);
+      btn.addEventListener("pointerleave", stopHold);
+      btn.addEventListener("pointercancel", stopHold);
+    });
+  });
+
+  // ---------- Settings view: batches ----------
   var colorPicksEl = document.getElementById("colorPicks");
   var selectedColor = COLORS[0];
-  COLORS.forEach(function(c, idx){
+  COLORS.forEach(function (c, idx) {
     var b = document.createElement("button");
     b.type = "button";
     b.className = "color-pick" + (idx===0 ? " selected" : "");
     b.style.background = c;
-    b.addEventListener("click", function(){
+    b.addEventListener("click", function () {
       selectedColor = c;
-      Array.prototype.forEach.call(colorPicksEl.children, function(ch){ ch.classList.remove("selected"); });
+      Array.prototype.forEach.call(colorPicksEl.children, function (ch) { ch.classList.remove("selected"); });
       b.classList.add("selected");
     });
     colorPicksEl.appendChild(b);
@@ -496,155 +635,161 @@
   var batchDateInp = document.getElementById("batchDate");
   batchDateInp.value = isoDate(today);
 
-  document.getElementById("addBatchBtn").addEventListener("click", function(){
+  document.getElementById("addBatchBtn").addEventListener("click", function () {
     var label = (batchLabelInp.value||"").trim();
-    if(!label) label = "Batch " + (state.batches.length+1);
+    if (!label) label = "Batch " + (batches.length+1);
     var dateVal = batchDateInp.value;
-    if(!dateVal) return;
-    state.batches.push({
-      id: "b" + Date.now() + Math.floor(Math.random()*1000),
-      label: label,
-      color: selectedColor,
-      serviceDate: dateVal
-    });
-    saveBatches();
+    if (!dateVal) return;
+    batches.push({ id: "b"+Date.now()+Math.floor(Math.random()*1000), label: label, color: selectedColor, serviceDate: dateVal });
+    persistBatches();
     batchLabelInp.value = "";
     renderBatchList();
-    renderMonth();
   });
 
-  function removeBatch(id){
-    state.batches = state.batches.filter(function(b){ return b.id !== id; });
-    saveBatches();
+  function deleteBatch(id) {
+    batches = batches.filter(function (b) { return b.id !== id; });
+    persistBatches();
     renderBatchList();
-    renderMonth();
   }
 
-  function renderBatchList(){
-    var el = document.getElementById("batchList");
-    if(state.batches.length===0){
-      el.innerHTML = '<div style="color:var(--muted);font-size:13px;">No batches yet — add a first-service date below to project farrowing, weaning, and repeat cycles on the calendar.</div>';
-      return;
-    }
-    el.innerHTML = state.batches.map(function(b){
+  function fmtShort(dt) { return dt.getDate() + " " + MONTHSHORT[dt.getMonth()]; }
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; });
+  }
+
+  var batchList = document.getElementById("batchList");
+  var batchEmptyNote = document.getElementById("batchEmptyNote");
+  function renderBatchList() {
+    batchEmptyNote.hidden = batches.length > 0;
+    batchList.innerHTML = "";
+    batches.forEach(function (b) {
       var sd = parseISO(b.serviceDate);
-      var fd = addDays(sd, state.settings.gestation);
-      var wd = addDays(fd, state.settings.lactation);
-      return '<div class="batch-row">'
-        + '<span class="swatch" style="background:'+b.color+'"></span>'
-        + '<span class="label">'+escapeHtml(b.label)+'</span>'
-        + '<span class="dates">S '+fmtShort(sd)+' &nbsp;·&nbsp; F '+fmtShort(fd)+' &nbsp;·&nbsp; W '+fmtShort(wd)+'</span>'
-        + '<button data-id="'+b.id+'" class="removeBatchBtn ghost">Remove</button>'
-        + '</div>';
-    }).join("");
-    Array.prototype.forEach.call(el.querySelectorAll(".removeBatchBtn"), function(btn){
-      btn.addEventListener("click", function(){ removeBatch(btn.getAttribute("data-id")); });
-    });
-  }
+      var fd = addDays(sd, settings.gestation);
+      var wd = addDays(fd, settings.lactation);
 
-  function fmtShort(dt){ return dt.getDate() + " " + MONTHSHORT[dt.getMonth()]; }
-  function escapeHtml(s){
-    return s.replace(/[&<>"']/g, function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+      var card = document.createElement("div");
+      card.className = "preset-card";
+
+      var swatch = document.createElement("span");
+      swatch.className = "preset-swatch";
+      swatch.style.background = b.color;
+
+      var main = document.createElement("div");
+      main.className = "preset-main";
+      main.innerHTML = '<div class="pname"></div><div class="pmeta"></div>';
+      main.querySelector(".pname").textContent = b.label;
+      main.querySelector(".pmeta").textContent = "S " + fmtShort(sd) + " · F " + fmtShort(fd) + " · W " + fmtShort(wd);
+
+      var del = document.createElement("button");
+      del.className = "preset-del";
+      del.textContent = "✕";
+      del.setAttribute("aria-label", "Delete " + b.label);
+      var confirmTimer = null;
+      del.addEventListener("click", function () {
+        if (del.classList.contains("confirm")) {
+          clearTimeout(confirmTimer);
+          deleteBatch(b.id);
+        } else {
+          del.classList.add("confirm");
+          del.textContent = "Delete?";
+          confirmTimer = setTimeout(function () { del.classList.remove("confirm"); del.textContent = "✕"; }, 2500);
+        }
+      });
+
+      card.appendChild(swatch);
+      card.appendChild(main);
+      card.appendChild(del);
+      batchList.appendChild(card);
     });
   }
 
   /* compute S/F/W events for a batch that fall within [rangeStart, rangeEnd] inclusive,
      chaining repeat cycles (service -> farrow -> wean -> next service) as far as needed */
-  function batchEventsInRange(batch, rangeStart, rangeEnd){
+  function batchEventsInRange(batch, rangeStart, rangeEnd) {
     var events = [];
     var cursor = parseISO(batch.serviceDate);
     var safety = 0;
-    while(cursor.getTime() <= rangeEnd.getTime() && safety < 200){
+    while (cursor.getTime() <= rangeEnd.getTime() && safety < 200) {
       safety++;
-      var farrow = addDays(cursor, state.settings.gestation);
-      var wean = addDays(farrow, state.settings.lactation);
-      if(cursor.getTime() >= rangeStart.getTime() && cursor.getTime() <= rangeEnd.getTime()){
-        events.push({date:cursor, type:"S", batch:batch});
-      }
-      if(farrow.getTime() >= rangeStart.getTime() && farrow.getTime() <= rangeEnd.getTime()){
-        events.push({date:farrow, type:"F", batch:batch});
-      }
-      if(wean.getTime() >= rangeStart.getTime() && wean.getTime() <= rangeEnd.getTime()){
-        events.push({date:wean, type:"W", batch:batch});
-      }
-      cursor = addDays(wean, state.settings.wsi);
+      var farrow = addDays(cursor, settings.gestation);
+      var wean = addDays(farrow, settings.lactation);
+      if (cursor.getTime() >= rangeStart.getTime() && cursor.getTime() <= rangeEnd.getTime()) events.push({date:cursor, type:"S", batch:batch});
+      if (farrow.getTime() >= rangeStart.getTime() && farrow.getTime() <= rangeEnd.getTime()) events.push({date:farrow, type:"F", batch:batch});
+      if (wean.getTime() >= rangeStart.getTime() && wean.getTime() <= rangeEnd.getTime()) events.push({date:wean, type:"W", batch:batch});
+      cursor = addDays(wean, settings.wsi);
     }
     return events;
   }
+  function eventLabel(t) { return t==="S" ? "Service" : t==="F" ? "Farrowing" : "Weaning"; }
 
-  /* ================= MONTH VIEW (Gregorian + cycle-day) ================= */
+  // ---------- Calendar view (Gregorian + cycle-day) ----------
   var mTitle = document.getElementById("mTitle");
   var mWeekdays = document.getElementById("mWeekdays");
   var mGrid = document.getElementById("mGrid");
   var mCycleToday = document.getElementById("mCycleToday");
 
-  document.getElementById("mPrev").addEventListener("click", function(){
-    state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()-1, 1);
+  document.getElementById("mPrev").addEventListener("click", function () {
+    monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth()-1, 1);
     renderMonth();
   });
-  document.getElementById("mNext").addEventListener("click", function(){
-    state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()+1, 1);
+  document.getElementById("mNext").addEventListener("click", function () {
+    monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth()+1, 1);
     renderMonth();
   });
-  document.getElementById("mToday").addEventListener("click", function(){
-    state.monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
+  document.getElementById("mToday").addEventListener("click", function () {
+    monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
     renderMonth();
   });
-  document.getElementById("jumpForm").addEventListener("submit", function(e){
+  document.getElementById("jumpForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    var raw = document.getElementById("jumpInp").value;
-    var idx = parseCycleDay(raw);
-    if(idx===null) return;
-    var epoch = parseISO(state.settings.epoch);
-    var target = dateFromCycleDayIndex(epoch, idx);
-    state.monthCursor = new Date(target.getFullYear(), target.getMonth(), 1);
+    var idx = parseCycleDay(document.getElementById("jumpInp").value);
+    if (idx === null) return;
+    var target = addDays(parseISO(settings.epoch), idx);
+    monthCursor = new Date(target.getFullYear(), target.getMonth(), 1);
     renderMonth();
   });
 
-  function renderMonth(){
-    var epoch = parseISO(state.settings.epoch);
-    var y = state.monthCursor.getFullYear(), m = state.monthCursor.getMonth();
+  function renderMonth() {
+    var epoch = parseISO(settings.epoch);
+    var y = monthCursor.getFullYear(), m = monthCursor.getMonth();
     mTitle.textContent = MONTHNAMES[m] + " " + y;
-    mCycleToday.textContent = "Today: " + cycleDayLabel(cycleDayIndex(epoch, today));
+    mCycleToday.innerHTML = "Today: <strong>" + cycleDayLabel(cycleDayIndex(epoch, today)) + "</strong>";
 
-    var labels = orderedWeekdayLabels(state.settings.weekStart);
-    mWeekdays.innerHTML = labels.map(function(l){ return "<div>"+l+"</div>"; }).join("");
+    var labels = orderedWeekdayLabels(settings.weekStart);
+    mWeekdays.innerHTML = labels.map(function (l) { return "<div>"+l+"</div>"; }).join("");
 
     var firstOfMonth = new Date(y,m,1);
-    var firstCellOffset = weekdayOffset(firstOfMonth.getDay(), state.settings.weekStart);
+    var firstCellOffset = weekdayOffset(firstOfMonth.getDay(), settings.weekStart);
     var gridStart = addDays(firstOfMonth, -firstCellOffset);
-
     var daysInMonth = new Date(y,m+1,0).getDate();
     var totalCells = Math.ceil((firstCellOffset + daysInMonth) / 7) * 7;
     var gridEnd = addDays(gridStart, totalCells-1);
 
-    // gather batch events for the whole visible grid range once
     var eventsByDate = {};
-    state.batches.forEach(function(b){
-      batchEventsInRange(b, gridStart, gridEnd).forEach(function(ev){
+    batches.forEach(function (b) {
+      batchEventsInRange(b, gridStart, gridEnd).forEach(function (ev) {
         var key = isoDate(ev.date);
-        if(!eventsByDate[key]) eventsByDate[key] = [];
+        if (!eventsByDate[key]) eventsByDate[key] = [];
         eventsByDate[key].push(ev);
       });
     });
 
     var html = "";
-    for(var i=0;i<totalCells;i++){
+    for (var i=0;i<totalCells;i++) {
       var cellDate = addDays(gridStart, i);
       var outside = cellDate.getMonth() !== m;
       var isToday = isSameDay(cellDate, today);
       var dow = cellDate.getDay();
       var weekend = dow===0 || dow===6;
       var cls = "day-cell";
-      if(outside) cls += " outside";
-      if(isToday) cls += " today";
-      if(weekend) cls += " weekend";
+      if (outside) cls += " outside";
+      if (isToday) cls += " today";
+      if (weekend) cls += " weekend";
 
       var key = isoDate(cellDate);
       var marksHtml = "";
-      if(eventsByDate[key]){
-        marksHtml = '<div class="marks">' + eventsByDate[key].map(function(ev){
+      if (eventsByDate[key]) {
+        marksHtml = '<div class="marks">' + eventsByDate[key].map(function (ev) {
           return '<span class="mark" style="background:'+ev.batch.color+'" title="'+escapeHtml(ev.batch.label)+' · '+eventLabel(ev.type)+'">'+ev.type+'</span>';
         }).join("") + '</div>';
       }
@@ -658,18 +803,13 @@
     mGrid.innerHTML = html;
   }
 
-  function eventLabel(t){
-    if(t==="S") return "Service";
-    if(t==="F") return "Farrowing";
-    return "Weaning";
-  }
-
-  /* ---------- init ---------- */
+  // ---------- init ----------
   applyTheme();
+  syncWeekStartRow();
+  syncThemeRow();
+  syncTimingFields();
   renderBatchList();
   renderMonth();
 
 })();
 </script>
-</body>
-</html>
