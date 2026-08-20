@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Sow Calendar</title>
-<meta name="description" content="Gregorian calendar and 1000-day pig production planner with configurable week start.">
+<meta name="description" content="Gregorian monthly calendar with the 1000-day (cycle-day) pig production count, configurable week start.">
 <meta name="theme-color" content="#1c6e4a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,7 +102,7 @@
 
   header.top{
     display:flex; align-items:center; justify-content:space-between;
-    gap:12px; margin-bottom:16px;
+    gap:12px; margin-bottom:16px; flex-wrap:wrap;
   }
   header.top h1{
     font-family:'Fraunces', serif;
@@ -110,16 +110,7 @@
     display:flex; align-items:center; gap:8px;
   }
   header.top h1 .pig{ font-size:24px; }
-
-  nav.tabs{
-    display:flex; gap:6px; background:var(--surface-2);
-    border:1px solid var(--border); border-radius:11px; padding:4px;
-  }
-  nav.tabs button{
-    border:none; background:transparent; border-radius:8px;
-    padding:8px 14px; color:var(--muted); font-weight:600;
-  }
-  nav.tabs button.active{ background:var(--surface); color:var(--fg); box-shadow:var(--shadow); }
+  header.top .subtitle{ font-size:12px; color:var(--muted); margin-top:2px; }
 
   .panel{
     background:var(--surface);
@@ -130,16 +121,19 @@
     margin-bottom:16px;
   }
 
-  .settings-toggle{ display:flex; justify-content:flex-end; margin-bottom:10px; }
-  .settings-body{ display:none; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .settings-toggle{ display:flex; justify-content:flex-end; margin-bottom:0; }
+  .settings-toggle.opened{ margin-bottom:10px; }
+  .settings-body{ display:none; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
   .settings-body.open{ display:grid; }
   .field{ display:flex; flex-direction:column; gap:4px; }
   .field label{ font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+  .field .hint{ font-size:11px; color:var(--muted-2); font-weight:500; text-transform:none; letter-spacing:0; }
 
   /* Month view */
-  .month-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .month-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap:10px; flex-wrap:wrap; }
   .month-head .title{ font-family:'Fraunces', serif; font-size:20px; font-weight:600; min-width:180px; text-align:center; }
   .month-head .navgrp{ display:flex; gap:6px; align-items:center; }
+  .month-sub{ text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px; }
 
   .weekday-row, .month-grid{
     display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
@@ -150,64 +144,32 @@
     text-transform:uppercase; letter-spacing:.04em; padding:4px 0;
   }
   .day-cell{
-    aspect-ratio:1/1;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    border-radius:10px; font-size:14px; font-weight:600;
+    min-height:74px;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    gap:2px; padding:8px 3px 6px;
+    border-radius:10px;
     background:var(--surface-2); color:var(--fg);
     position:relative;
   }
-  .day-cell.outside{ color:var(--muted-2); background:transparent; font-weight:500; }
-  .day-cell.today{
-    box-shadow:0 0 0 2px var(--today-ring) inset;
-    color:var(--amber);
+  .day-cell .datenum{ font-size:15px; font-weight:700; line-height:1; }
+  .day-cell .cycletag{
+    font-size:10.5px; font-weight:600; color:var(--muted);
+    letter-spacing:.01em; font-variant-numeric:tabular-nums;
   }
-  .day-cell.weekend{ color:var(--muted); }
-  .day-cell.outside.weekend{ color:var(--muted-2); }
+  .day-cell.outside{ opacity:.4; }
+  .day-cell.today{ box-shadow:0 0 0 2px var(--today-ring) inset; }
+  .day-cell.today .datenum{ color:var(--amber); }
+  .day-cell.today .cycletag{ color:var(--amber); }
+  .day-cell.weekend .datenum{ color:var(--muted); }
 
-  /* Planner */
-  .planner-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
-  .planner-toolbar .navgrp{ display:flex; gap:6px; align-items:center; }
-  .progress{
-    font-size:12px; color:var(--muted); white-space:nowrap;
-  }
-  .jump-form{ display:flex; gap:6px; align-items:center; }
-  .jump-form input{ width:76px; }
-
-  .week-row{
-    display:grid; grid-template-columns:64px repeat(7,1fr); gap:6px; margin-bottom:6px;
-  }
-  .week-row .weeklabel{
-    display:flex; align-items:center; justify-content:center;
-    font-size:11px; color:var(--muted-2); font-weight:700;
-  }
-  .planner-head{
-    display:grid; grid-template-columns:64px repeat(7,1fr); gap:6px; margin-bottom:6px;
-  }
-  .planner-head div{
-    text-align:center; font-size:11px; font-weight:700; color:var(--muted-2);
-    text-transform:uppercase; letter-spacing:.04em; padding:2px 0;
-  }
-
-  .pcell{
-    background:var(--surface-2);
-    border-radius:10px;
-    padding:6px 4px 5px;
-    min-height:58px;
-    display:flex; flex-direction:column; gap:3px;
-    position:relative;
-  }
-  .pcell .daynum{ font-size:9px; font-weight:700; color:var(--muted-2); text-transform:uppercase; }
-  .pcell .datenum{ font-size:14px; font-weight:700; line-height:1; }
-  .pcell .monthtag{ font-size:9px; color:var(--muted); font-weight:600; }
-  .pcell.today{ box-shadow:0 0 0 2px var(--today-ring) inset; }
-  .pcell.today .datenum{ color:var(--amber); }
-  .pcell.out-of-range{ opacity:.35; }
-
-  .marks{ display:flex; flex-wrap:wrap; gap:2px; margin-top:auto; }
+  .marks{ display:flex; flex-wrap:wrap; gap:2px; margin-top:auto; justify-content:center; }
   .mark{
     font-size:8.5px; font-weight:800; color:#fff;
     border-radius:4px; padding:1px 3px; line-height:1.3;
   }
+
+  .jump-form{ display:flex; gap:6px; align-items:center; }
+  .jump-form input{ width:80px; font-variant-numeric:tabular-nums; }
 
   .legend{ display:flex; flex-direction:column; gap:8px; margin-top:4px; }
   .batch-row{
@@ -237,10 +199,11 @@
   footer.hint{ text-align:center; color:var(--muted-2); font-size:12px; margin-top:20px; }
 
   @media (max-width:520px){
-    .week-row, .planner-head{ grid-template-columns:34px repeat(7,1fr); gap:4px; }
-    .pcell{ min-height:50px; padding:4px 2px; }
-    .pcell .datenum{ font-size:12px; }
+    .day-cell{ min-height:56px; padding:5px 2px 4px; }
+    .day-cell .datenum{ font-size:13px; }
+    .day-cell .cycletag{ font-size:9px; }
     .month-head .title{ min-width:0; font-size:17px; }
+    .mark{ font-size:7.5px; }
   }
 </style>
 </head>
@@ -248,16 +211,15 @@
 <div class="app">
 
   <header class="top">
-    <h1><span class="pig">🐖</span> Sow Calendar</h1>
-    <nav class="tabs" id="tabs">
-      <button data-view="month" class="active">Calendar</button>
-      <button data-view="planner">1000-Day Planner</button>
-    </nav>
+    <div>
+      <h1><span class="pig">🐖</span> Sow Calendar</h1>
+      <div class="subtitle">Gregorian + 1000-day cycle count</div>
+    </div>
   </header>
 
-  <!-- ===== Global settings ===== -->
+  <!-- ===== Settings ===== -->
   <div class="panel">
-    <div class="settings-toggle">
+    <div class="settings-toggle" id="settingsToggleWrap">
       <button class="ghost icon" id="settingsBtn" title="Settings" aria-label="Settings">⚙️</button>
     </div>
     <div class="settings-body" id="settingsBody">
@@ -281,10 +243,53 @@
           <option value="dark">Dark</option>
         </select>
       </div>
+      <div class="field">
+        <label for="epochInp">Cycle 00 / Day 000 date</label>
+        <input type="date" id="epochInp">
+        <span class="hint">Reference date the 1000-day count starts from</span>
+      </div>
+      <div class="field">
+        <label for="gestationInp">Gestation (days)</label>
+        <input type="number" id="gestationInp" min="90" max="130" step="1">
+      </div>
+      <div class="field">
+        <label for="lactationInp">Lactation → weaning (days)</label>
+        <input type="number" id="lactationInp" min="14" max="35" step="1">
+      </div>
+      <div class="field">
+        <label for="wsiInp">Wean-to-service interval (days)</label>
+        <input type="number" id="wsiInp" min="3" max="14" step="1">
+      </div>
     </div>
   </div>
 
-  <!-- ===== Gregorian month view ===== -->
+  <!-- ===== Breeding batches ===== -->
+  <div class="panel">
+    <h2 class="section-title">Breeding batches</h2>
+    <div class="legend" id="batchList"></div>
+    <div class="add-batch">
+      <div class="field">
+        <label for="batchLabel">Label</label>
+        <input type="text" id="batchLabel" placeholder="e.g. Group A" maxlength="24" style="width:140px;">
+      </div>
+      <div class="field">
+        <label for="batchDate">First service date</label>
+        <input type="date" id="batchDate">
+      </div>
+      <div class="field">
+        <label>Color</label>
+        <div class="color-picks" id="colorPicks"></div>
+      </div>
+      <button class="primary" id="addBatchBtn">Add batch</button>
+    </div>
+    <div class="key-legend">
+      <span><i style="background:var(--accent)">S</i> Service / AI</span>
+      <span><i style="background:var(--danger)">F</i> Farrowing (~term)</span>
+      <span><i style="background:var(--amber)">W</i> Weaning</span>
+    </div>
+  </div>
+
+  <!-- ===== Monthly calendar (Gregorian + 1000-day) ===== -->
   <section id="view-month" class="panel">
     <div class="month-head">
       <button class="icon ghost" id="mPrev" aria-label="Previous month">‹</button>
@@ -294,84 +299,16 @@
         <button class="icon ghost" id="mNext" aria-label="Next month">›</button>
       </div>
     </div>
+    <div class="month-head" style="margin-top:2px;">
+      <form class="jump-form" id="jumpForm">
+        <label for="jumpInp" style="font-size:12px;color:var(--muted);">Jump to cycle-day</label>
+        <input type="text" id="jumpInp" placeholder="20-051" pattern="\d{1,2}-\d{1,3}">
+        <button type="submit">Go</button>
+      </form>
+      <div class="progress" id="mCycleToday" style="font-size:12px;color:var(--muted);"></div>
+    </div>
     <div class="weekday-row" id="mWeekdays"></div>
     <div class="month-grid" id="mGrid"></div>
-  </section>
-
-  <!-- ===== 1000-day planner ===== -->
-  <section id="view-planner" style="display:none;">
-
-    <div class="panel">
-      <div class="settings-toggle">
-        <button class="ghost icon" id="plannerCfgBtn" title="Planner settings" aria-label="Planner settings">⚙️</button>
-      </div>
-      <div class="settings-body" id="plannerCfgBody">
-        <div class="field">
-          <label for="startDateInp">Day 1 (start date)</label>
-          <input type="date" id="startDateInp">
-        </div>
-        <div class="field">
-          <label for="totalDaysInp">Total days</label>
-          <input type="number" id="totalDaysInp" min="100" max="1500" step="1">
-        </div>
-        <div class="field">
-          <label for="gestationInp">Gestation (days)</label>
-          <input type="number" id="gestationInp" min="90" max="130" step="1">
-        </div>
-        <div class="field">
-          <label for="lactationInp">Lactation → weaning (days)</label>
-          <input type="number" id="lactationInp" min="14" max="35" step="1">
-        </div>
-        <div class="field">
-          <label for="wsiInp">Wean-to-service interval (days)</label>
-          <input type="number" id="wsiInp" min="3" max="14" step="1">
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2 class="section-title">Breeding batches</h2>
-      <div class="legend" id="batchList"></div>
-      <div class="add-batch">
-        <div class="field">
-          <label for="batchLabel">Label</label>
-          <input type="text" id="batchLabel" placeholder="e.g. Group A" maxlength="24" style="width:140px;">
-        </div>
-        <div class="field">
-          <label for="batchDate">First service date</label>
-          <input type="date" id="batchDate">
-        </div>
-        <div class="field">
-          <label>Color</label>
-          <div class="color-picks" id="colorPicks"></div>
-        </div>
-        <button class="primary" id="addBatchBtn">Add batch</button>
-      </div>
-      <div class="key-legend">
-        <span><i style="background:var(--accent)">S</i> Service / AI</span>
-        <span><i style="background:var(--danger)">F</i> Farrowing (~term)</span>
-        <span><i style="background:var(--amber)">W</i> Weaning</span>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="planner-toolbar">
-        <div class="navgrp">
-          <button class="icon ghost" id="pPrev" aria-label="Previous page">‹</button>
-          <button id="pToday">Jump to today</button>
-          <button class="icon ghost" id="pNext" aria-label="Next page">›</button>
-        </div>
-        <div class="progress" id="pProgress"></div>
-        <form class="jump-form" id="jumpForm">
-          <label for="jumpInp" style="font-size:12px;color:var(--muted);">Day</label>
-          <input type="number" id="jumpInp" min="1" step="1">
-          <button type="submit">Go</button>
-        </form>
-      </div>
-      <div class="planner-head" id="pWeekdays"></div>
-      <div id="pGrid"></div>
-    </div>
-
   </section>
 
   <footer class="hint">Settings are saved automatically in this browser.</footer>
@@ -382,8 +319,8 @@
   "use strict";
 
   /* ---------- storage ---------- */
-  var LS_SETTINGS = "sowcal.settings.v1";
-  var LS_BATCHES  = "sowcal.batches.v1";
+  var LS_SETTINGS = "sowcal.settings.v2";
+  var LS_BATCHES  = "sowcal.batches.v2";
 
   var DAYNAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   var MONTHNAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -391,12 +328,16 @@
 
   var COLORS = ["#1c6e4a","#c8781f","#2f6fa0","#8a4fb0","#b3432c","#3a8f8f","#a08a1c","#5a5fc7"];
 
+  // Default epoch: inferred so that "today" reads as cycle-day 20-051, per the
+  // reference calendar this app is matching. Adjust in Settings if your
+  // farm's actual Cycle 00 / Day 000 date differs.
+  var DEFAULT_EPOCH = "1971-09-27";
+
   function defaultSettings(){
     return {
       weekStart: 1,          // Monday default
       theme: "system",
-      startDate: isoDate(startOfYear(new Date())),
-      totalDays: 1000,
+      epoch: DEFAULT_EPOCH,
       gestation: 114,
       lactation: 21,
       wsi: 5
@@ -423,8 +364,6 @@
   function saveBatches(){ localStorage.setItem(LS_BATCHES, JSON.stringify(state.batches)); }
 
   /* ---------- date helpers (local time, no TZ surprises) ---------- */
-  function d(y,m,day){ return new Date(y,m,day); }
-  function startOfYear(dt){ return new Date(dt.getFullYear(),0,1); }
   function isoDate(dt){
     var y=dt.getFullYear(), m=String(dt.getMonth()+1).padStart(2,"0"), day=String(dt.getDate()).padStart(2,"0");
     return y+"-"+m+"-"+day;
@@ -449,14 +388,36 @@
     return out;
   }
 
+  /* ---------- 1000-day cycle-day formatting ---------- */
+  // Continuous count of days since the configured epoch (Cycle 00 / Day 000),
+  // formatted as CC-DDD: cycle = which block of 1000 days, day = 000-999
+  // position within it. Wraps every 100 cycles (100,000 days, ~274 years).
+  function cycleDayIndex(epochDate, date){ return daysBetween(epochDate, date); }
+  function cycleDayLabel(idx){
+    var cycle = Math.floor(idx/1000) % 100;
+    var day = ((idx % 1000) + 1000) % 1000;
+    if(cycle < 0) cycle += 100;
+    return pad(cycle,2) + "-" + pad(day,3);
+  }
+  function pad(n,width){
+    var s = String(Math.abs(n));
+    while(s.length < width) s = "0" + s;
+    return (n<0?"-":"") + s;
+  }
+  function parseCycleDay(str){
+    var m = /^\s*(\d{1,2})\s*-\s*(\d{1,3})\s*$/.exec(str);
+    if(!m) return null;
+    var cycle = Number(m[1]), day = Number(m[2]);
+    if(day > 999) return null;
+    return cycle*1000 + day;
+  }
+  function dateFromCycleDayIndex(epochDate, idx){ return addDays(epochDate, idx); }
+
   /* ---------- state ---------- */
   var state = {
-    view: "month",
     settings: loadSettings(),
     batches: loadBatches(),
-    monthCursor: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    plannerPage: 0,
-    weeksPerPage: 8
+    monthCursor: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   };
 
   var today = new Date(); today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -468,123 +429,54 @@
     else document.documentElement.setAttribute("data-theme", t);
   }
 
-  /* ---------- tabs ---------- */
-  var tabsEl = document.getElementById("tabs");
-  tabsEl.addEventListener("click", function(e){
-    var btn = e.target.closest("button[data-view]");
-    if(!btn) return;
-    state.view = btn.getAttribute("data-view");
-    Array.prototype.forEach.call(tabsEl.querySelectorAll("button"), function(b){
-      b.classList.toggle("active", b===btn);
-    });
-    document.getElementById("view-month").style.display = state.view==="month" ? "" : "none";
-    document.getElementById("view-planner").style.display = state.view==="planner" ? "" : "none";
-    if(state.view==="planner") renderPlanner();
-  });
-
-  /* ---------- global settings panel ---------- */
+  /* ---------- settings panel ---------- */
   var settingsBtn = document.getElementById("settingsBtn");
   var settingsBody = document.getElementById("settingsBody");
-  settingsBtn.addEventListener("click", function(){ settingsBody.classList.toggle("open"); });
+  var settingsToggleWrap = document.getElementById("settingsToggleWrap");
+  settingsBtn.addEventListener("click", function(){
+    settingsBody.classList.toggle("open");
+    settingsToggleWrap.classList.toggle("opened", settingsBody.classList.contains("open"));
+  });
 
   var weekStartSel = document.getElementById("weekStartSel");
   var themeSel = document.getElementById("themeSel");
+  var epochInp = document.getElementById("epochInp");
+  var gestationInp = document.getElementById("gestationInp");
+  var lactationInp = document.getElementById("lactationInp");
+  var wsiInp = document.getElementById("wsiInp");
+
   weekStartSel.value = String(state.settings.weekStart);
   themeSel.value = state.settings.theme;
+  epochInp.value = state.settings.epoch;
+  gestationInp.value = state.settings.gestation;
+  lactationInp.value = state.settings.lactation;
+  wsiInp.value = state.settings.wsi;
+
   weekStartSel.addEventListener("change", function(){
     state.settings.weekStart = Number(weekStartSel.value);
     saveSettings();
     renderMonth();
-    renderPlanner();
   });
   themeSel.addEventListener("change", function(){
     state.settings.theme = themeSel.value;
     saveSettings();
     applyTheme();
   });
-
-  /* ================= MONTH VIEW ================= */
-  var mTitle = document.getElementById("mTitle");
-  var mWeekdays = document.getElementById("mWeekdays");
-  var mGrid = document.getElementById("mGrid");
-
-  document.getElementById("mPrev").addEventListener("click", function(){
-    state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()-1, 1);
-    renderMonth();
-  });
-  document.getElementById("mNext").addEventListener("click", function(){
-    state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()+1, 1);
-    renderMonth();
-  });
-  document.getElementById("mToday").addEventListener("click", function(){
-    state.monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
-    renderMonth();
-  });
-
-  function renderMonth(){
-    var y = state.monthCursor.getFullYear(), m = state.monthCursor.getMonth();
-    mTitle.textContent = MONTHNAMES[m] + " " + y;
-
-    var labels = orderedWeekdayLabels(state.settings.weekStart);
-    mWeekdays.innerHTML = labels.map(function(l){ return "<div>"+l+"</div>"; }).join("");
-
-    var firstOfMonth = new Date(y,m,1);
-    var firstCellOffset = weekdayOffset(firstOfMonth.getDay(), state.settings.weekStart);
-    var gridStart = addDays(firstOfMonth, -firstCellOffset);
-
-    var daysInMonth = new Date(y,m+1,0).getDate();
-    var totalCells = Math.ceil((firstCellOffset + daysInMonth) / 7) * 7;
-
-    var html = "";
-    for(var i=0;i<totalCells;i++){
-      var cellDate = addDays(gridStart, i);
-      var outside = cellDate.getMonth() !== m;
-      var isToday = isSameDay(cellDate, today);
-      var dow = cellDate.getDay();
-      var weekend = dow===0 || dow===6;
-      var cls = "day-cell";
-      if(outside) cls += " outside";
-      if(isToday) cls += " today";
-      if(weekend) cls += " weekend";
-      html += '<div class="'+cls+'">'+cellDate.getDate()+'</div>';
-    }
-    mGrid.innerHTML = html;
-  }
-
-  /* ================= PLANNER (1000-day) ================= */
-  var startDateInp = document.getElementById("startDateInp");
-  var totalDaysInp = document.getElementById("totalDaysInp");
-  var gestationInp = document.getElementById("gestationInp");
-  var lactationInp = document.getElementById("lactationInp");
-  var wsiInp = document.getElementById("wsiInp");
-  var plannerCfgBtn = document.getElementById("plannerCfgBtn");
-  var plannerCfgBody = document.getElementById("plannerCfgBody");
-
-  plannerCfgBtn.addEventListener("click", function(){ plannerCfgBody.classList.toggle("open"); });
-
-  startDateInp.value = state.settings.startDate;
-  totalDaysInp.value = state.settings.totalDays;
-  gestationInp.value = state.settings.gestation;
-  lactationInp.value = state.settings.lactation;
-  wsiInp.value = state.settings.wsi;
-
-  function onPlannerCfgChange(){
-    state.settings.startDate = startDateInp.value || state.settings.startDate;
-    state.settings.totalDays = clamp(Number(totalDaysInp.value)||1000, 100, 1500);
+  function clamp(n,lo,hi){ return Math.max(lo, Math.min(hi, n)); }
+  function onCfgChange(){
+    state.settings.epoch = epochInp.value || state.settings.epoch;
     state.settings.gestation = clamp(Number(gestationInp.value)||114, 90, 130);
     state.settings.lactation = clamp(Number(lactationInp.value)||21, 14, 35);
     state.settings.wsi = clamp(Number(wsiInp.value)||5, 3, 14);
     saveSettings();
-    state.plannerPage = 0;
-    renderPlanner();
+    renderBatchList();
+    renderMonth();
   }
-  [startDateInp,totalDaysInp,gestationInp,lactationInp,wsiInp].forEach(function(el){
-    el.addEventListener("change", onPlannerCfgChange);
+  [epochInp,gestationInp,lactationInp,wsiInp].forEach(function(el){
+    el.addEventListener("change", onCfgChange);
   });
 
-  function clamp(n,lo,hi){ return Math.max(lo, Math.min(hi, n)); }
-
-  /* batches */
+  /* ---------- batches ---------- */
   var colorPicksEl = document.getElementById("colorPicks");
   var selectedColor = COLORS[0];
   COLORS.forEach(function(c, idx){
@@ -618,20 +510,20 @@
     saveBatches();
     batchLabelInp.value = "";
     renderBatchList();
-    renderPlanner();
+    renderMonth();
   });
 
   function removeBatch(id){
     state.batches = state.batches.filter(function(b){ return b.id !== id; });
     saveBatches();
     renderBatchList();
-    renderPlanner();
+    renderMonth();
   }
 
   function renderBatchList(){
     var el = document.getElementById("batchList");
     if(state.batches.length===0){
-      el.innerHTML = '<div style="color:var(--muted);font-size:13px;">No batches yet — add a first-service date below to project farrowing, weaning, and repeat cycles across the planner.</div>';
+      el.innerHTML = '<div style="color:var(--muted);font-size:13px;">No batches yet — add a first-service date below to project farrowing, weaning, and repeat cycles on the calendar.</div>';
       return;
     }
     el.innerHTML = state.batches.map(function(b){
@@ -657,14 +549,13 @@
     });
   }
 
-  /* compute events (S/F/W) for a batch across the whole planner range, chaining cycles */
-  function batchEventsInRange(batch, rangeStart, rangeDaysCount){
+  /* compute S/F/W events for a batch that fall within [rangeStart, rangeEnd] inclusive,
+     chaining repeat cycles (service -> farrow -> wean -> next service) as far as needed */
+  function batchEventsInRange(batch, rangeStart, rangeEnd){
     var events = [];
-    var rangeEnd = addDays(rangeStart, rangeDaysCount-1);
     var cursor = parseISO(batch.serviceDate);
     var safety = 0;
-    // if first service is after range end, nothing to show
-    while(cursor.getTime() <= rangeEnd.getTime() && safety < 60){
+    while(cursor.getTime() <= rangeEnd.getTime() && safety < 200){
       safety++;
       var farrow = addDays(cursor, state.settings.gestation);
       var wean = addDays(farrow, state.settings.lactation);
@@ -682,107 +573,91 @@
     return events;
   }
 
-  function eventTypeColor(type){
-    if(type==="S") return "var(--accent)";
-    if(type==="F") return "var(--danger)";
-    return "var(--amber)"; // W
-  }
+  /* ================= MONTH VIEW (Gregorian + cycle-day) ================= */
+  var mTitle = document.getElementById("mTitle");
+  var mWeekdays = document.getElementById("mWeekdays");
+  var mGrid = document.getElementById("mGrid");
+  var mCycleToday = document.getElementById("mCycleToday");
 
-  var pWeekdays = document.getElementById("pWeekdays");
-  var pGrid = document.getElementById("pGrid");
-  var pProgress = document.getElementById("pProgress");
-
-  document.getElementById("pPrev").addEventListener("click", function(){
-    state.plannerPage = Math.max(0, state.plannerPage-1);
-    renderPlanner();
+  document.getElementById("mPrev").addEventListener("click", function(){
+    state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()-1, 1);
+    renderMonth();
   });
-  document.getElementById("pNext").addEventListener("click", function(){
-    state.plannerPage = state.plannerPage+1;
-    renderPlanner();
+  document.getElementById("mNext").addEventListener("click", function(){
+    state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()+1, 1);
+    renderMonth();
   });
-  document.getElementById("pToday").addEventListener("click", function(){
-    jumpToDayNumber(currentDayNumber());
+  document.getElementById("mToday").addEventListener("click", function(){
+    state.monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
+    renderMonth();
   });
   document.getElementById("jumpForm").addEventListener("submit", function(e){
     e.preventDefault();
-    var n = Number(document.getElementById("jumpInp").value);
-    if(n) jumpToDayNumber(n);
+    var raw = document.getElementById("jumpInp").value;
+    var idx = parseCycleDay(raw);
+    if(idx===null) return;
+    var epoch = parseISO(state.settings.epoch);
+    var target = dateFromCycleDayIndex(epoch, idx);
+    state.monthCursor = new Date(target.getFullYear(), target.getMonth(), 1);
+    renderMonth();
   });
 
-  function currentDayNumber(){
-    var start = parseISO(state.settings.startDate);
-    return daysBetween(start, today) + 1; // 1-indexed
-  }
-  function jumpToDayNumber(n){
-    n = clamp(n, 1, state.settings.totalDays);
-    var perPage = state.weeksPerPage*7;
-    state.plannerPage = Math.floor((n-1)/perPage);
-    renderPlanner();
-  }
+  function renderMonth(){
+    var epoch = parseISO(state.settings.epoch);
+    var y = state.monthCursor.getFullYear(), m = state.monthCursor.getMonth();
+    mTitle.textContent = MONTHNAMES[m] + " " + y;
+    mCycleToday.textContent = "Today: " + cycleDayLabel(cycleDayIndex(epoch, today));
 
-  function renderPlanner(){
     var labels = orderedWeekdayLabels(state.settings.weekStart);
-    pWeekdays.innerHTML = "<div></div>" + labels.map(function(l){ return "<div>"+l+"</div>"; }).join("");
+    mWeekdays.innerHTML = labels.map(function(l){ return "<div>"+l+"</div>"; }).join("");
 
-    var start = parseISO(state.settings.startDate);
-    var totalDays = state.settings.totalDays;
-    var perPage = state.weeksPerPage*7;
-    var maxPage = Math.max(0, Math.ceil(totalDays/perPage)-1);
-    state.plannerPage = clamp(state.plannerPage, 0, maxPage);
+    var firstOfMonth = new Date(y,m,1);
+    var firstCellOffset = weekdayOffset(firstOfMonth.getDay(), state.settings.weekStart);
+    var gridStart = addDays(firstOfMonth, -firstCellOffset);
 
-    // align first row of the whole planner to the weekday of "start", per weekStart setting
-    var startOffset = weekdayOffset(start.getDay(), state.settings.weekStart);
-    var pageFirstIndex = state.plannerPage*perPage; // index within the aligned grid (0 = startOffset back from start)
-    var gridOrigin = addDays(start, -startOffset);
+    var daysInMonth = new Date(y,m+1,0).getDate();
+    var totalCells = Math.ceil((firstCellOffset + daysInMonth) / 7) * 7;
+    var gridEnd = addDays(gridStart, totalCells-1);
 
-    // gather events for the whole range once, index by ISO date
+    // gather batch events for the whole visible grid range once
     var eventsByDate = {};
     state.batches.forEach(function(b){
-      batchEventsInRange(b, start, totalDays).forEach(function(ev){
+      batchEventsInRange(b, gridStart, gridEnd).forEach(function(ev){
         var key = isoDate(ev.date);
         if(!eventsByDate[key]) eventsByDate[key] = [];
         eventsByDate[key].push(ev);
       });
     });
 
-    var rowsHtml = "";
-    for(var w=0; w<state.weeksPerPage; w++){
-      rowsHtml += '<div class="week-row">';
-      var weekFirstIdx = pageFirstIndex + w*7;
-      var weekDate = addDays(gridOrigin, weekFirstIdx);
-      rowsHtml += '<div class="weeklabel">'+weekLabel(weekDate)+'</div>';
-      for(var c=0;c<7;c++){
-        var idx = weekFirstIdx + c;
-        var cellDate = addDays(gridOrigin, idx);
-        var dayNumber = daysBetween(start, cellDate) + 1;
-        var inRange = dayNumber>=1 && dayNumber<=totalDays;
-        var isToday = isSameDay(cellDate, today);
-        var isFirstOfMonth = cellDate.getDate()===1;
-        var cls = "pcell" + (isToday?" today":"") + (inRange?"":" out-of-range");
-        var marksHtml = "";
-        var key = isoDate(cellDate);
-        if(eventsByDate[key]){
-          marksHtml = '<div class="marks">' + eventsByDate[key].map(function(ev){
-            return '<span class="mark" style="background:'+ev.batch.color+'" title="'+escapeHtml(ev.batch.label)+' · '+eventLabel(ev.type)+'">'+ev.type+'</span>';
-          }).join("") + '</div>';
-        }
-        rowsHtml += '<div class="'+cls+'">'
-          + '<div class="daynum">'+(inRange?("Day "+dayNumber):"")+'</div>'
-          + '<div class="datenum">'+cellDate.getDate()+(isFirstOfMonth?(' <span class="monthtag">'+MONTHSHORT[cellDate.getMonth()]+'</span>'):'')+'</div>'
-          + marksHtml
-          + '</div>';
+    var html = "";
+    for(var i=0;i<totalCells;i++){
+      var cellDate = addDays(gridStart, i);
+      var outside = cellDate.getMonth() !== m;
+      var isToday = isSameDay(cellDate, today);
+      var dow = cellDate.getDay();
+      var weekend = dow===0 || dow===6;
+      var cls = "day-cell";
+      if(outside) cls += " outside";
+      if(isToday) cls += " today";
+      if(weekend) cls += " weekend";
+
+      var key = isoDate(cellDate);
+      var marksHtml = "";
+      if(eventsByDate[key]){
+        marksHtml = '<div class="marks">' + eventsByDate[key].map(function(ev){
+          return '<span class="mark" style="background:'+ev.batch.color+'" title="'+escapeHtml(ev.batch.label)+' · '+eventLabel(ev.type)+'">'+ev.type+'</span>';
+        }).join("") + '</div>';
       }
-      rowsHtml += '</div>';
+
+      html += '<div class="'+cls+'">'
+        + '<div class="datenum">'+cellDate.getDate()+'</div>'
+        + '<div class="cycletag">'+cycleDayLabel(cycleDayIndex(epoch, cellDate))+'</div>'
+        + marksHtml
+        + '</div>';
     }
-    pGrid.innerHTML = rowsHtml;
-
-    var rangeStartN = pageFirstIndex+1, rangeEndN = Math.min(pageFirstIndex+perPage, totalDays);
-    pProgress.textContent = "Days " + Math.max(1,rangeStartN) + "–" + Math.max(rangeStartN,rangeEndN) + " of " + totalDays;
+    mGrid.innerHTML = html;
   }
 
-  function weekLabel(weekDate){
-    return "W" + (Math.floor(daysBetween(startOfYear(weekDate), weekDate)/7)+1);
-  }
   function eventLabel(t){
     if(t==="S") return "Service";
     if(t==="F") return "Farrowing";
@@ -791,9 +666,8 @@
 
   /* ---------- init ---------- */
   applyTheme();
-  renderMonth();
   renderBatchList();
-  renderPlanner();
+  renderMonth();
 
 })();
 </script>
