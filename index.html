@@ -291,6 +291,43 @@
   }
   .preset-del.confirm { background: var(--danger); border-color: var(--danger); color: #fff; font-size: .68rem; font-weight: 700; width: auto; padding: 0 10px; }
   .empty-note { color: var(--muted); font-size: .82rem; padding: 6px 2px; }
+
+  /* ---------- Update banner ---------- */
+  .update-banner {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: var(--work);
+    color: var(--on-accent);
+  }
+  .update-banner span {
+    font-size: .82rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .update-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+  .update-refresh-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: none;
+    background: var(--on-accent);
+    color: var(--work-strong);
+    font-weight: 700;
+    font-size: .78rem;
+  }
+  .update-refresh-btn:active { transform: scale(.96); }
+  .update-dismiss-btn {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    color: var(--on-accent);
+    font-size: .75rem;
+    opacity: .85;
+  }
 </style>
 
 <div class="app" id="app">
@@ -447,6 +484,14 @@
       <div class="empty-note" id="batchEmptyNote" hidden>No batches yet — add a first-service date above to project farrowing, weaning, and repeat cycles on the calendar.</div>
     </div>
   </main>
+
+  <div class="update-banner" id="updateBanner" hidden>
+    <span id="updateBannerMsg">Update available.</span>
+    <div class="update-actions">
+      <button type="button" id="updateRefreshBtn" class="update-refresh-btn">Refresh</button>
+      <button type="button" id="updateDismissBtn" class="update-dismiss-btn" aria-label="Dismiss">✕</button>
+    </div>
+  </div>
 
   <div class="sheet-backdrop" id="sheetBackdrop"></div>
   <div class="day-sheet" id="daySheet">
@@ -966,6 +1011,46 @@
     sheetBackdrop.classList.add("open");
     daySheet.classList.add("open");
   }
+
+  // ---------- Update check ----------
+  // Installed-to-home-screen web apps have no service worker here, so
+  // iOS only re-fetches the page on a genuinely cold launch — resuming
+  // from the app switcher shows whatever was already in memory, and even
+  // a cold launch can hit a cached response. This polls a cache-busted
+  // HEAD request for the file's Last-Modified/ETag and prompts to reload
+  // when it changes, so a new version can be picked up without deleting
+  // and re-adding the home-screen icon.
+  var updateBanner = document.getElementById("updateBanner");
+  var updateRefreshBtn = document.getElementById("updateRefreshBtn");
+  var updateDismissBtn = document.getElementById("updateDismissBtn");
+  var knownVersionTag = null;
+  var updateDismissed = false;
+
+  function versionTagFrom(res) {
+    return res.headers.get("Last-Modified") || res.headers.get("ETag") || null;
+  }
+  function checkForUpdate() {
+    if (!knownVersionTag || updateDismissed) return;
+    fetch(location.pathname + "?_=" + Date.now(), { method: "HEAD", cache: "no-store" })
+      .then(function (res) {
+        var tag = versionTagFrom(res);
+        if (tag && tag !== knownVersionTag) updateBanner.hidden = false;
+      })
+      .catch(function () {});
+  }
+  fetch(location.pathname, { method: "HEAD", cache: "no-store" })
+    .then(function (res) { knownVersionTag = versionTagFrom(res); })
+    .catch(function () {});
+
+  updateRefreshBtn.addEventListener("click", function () { location.reload(); });
+  updateDismissBtn.addEventListener("click", function () {
+    updateDismissed = true;
+    updateBanner.hidden = true;
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") checkForUpdate();
+  });
+  setInterval(checkForUpdate, 5 * 60 * 1000);
 
   // ---------- init ----------
   applyTheme();
