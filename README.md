@@ -1,16 +1,20 @@
-# Sow Calendar
+# 1KDays
 
-A configurable Gregorian calendar plus a 1000-day pig-production wall-planner calendar.
+A Gregorian calendar paired with the 1000-day cycle-day count used in pig production, plus breeding-batch tracking for service, farrowing, and weaning dates.
+
+Live at [1kdays.mncubs.com](https://1kdays.mncubs.com).
 
 Single-file static app: `index.html`. No build step, no dependencies beyond a Google Fonts stylesheet link.
 
 ## Features
 
-- **Calendar** — standard Gregorian month view. Today is highlighted; the first day of the week is configurable (Sunday–Saturday).
-- **1000-Day Planner** — the continuous day-numbered wall-planner grid used in pig production, laid out in weekly rows from a chosen Day 1 start date, browsable in pages with a "jump to today" and "jump to day N" shortcut. Today is highlighted.
-  - Add breeding batches (a label, color, and first-service/AI date). Each batch auto-projects farrowing (service + gestation, default 114 days) and weaning (farrowing + lactation, default 21 days), then chains the next service date (weaning + wean-to-service interval, default 5 days) and repeats for as long as the planner range covers — so one entry shows a sow group's whole reproductive cycle across the 1000 days.
-  - Gestation length, lactation length, wean-to-service interval, start date, and total day count are all adjustable.
-- Settings (week start, theme, planner config, batches) persist in the browser via `localStorage`.
+- **Monthly calendar** — standard Gregorian month view, with the 1000-day cycle-day label (`CC-DDD`) shown on every date. Today is highlighted; the first day of the week is configurable (Sunday–Saturday).
+- **1000-day cycle-day count** — a continuous day count since a configurable reference date (Cycle 00 / Day 000), formatted as `CC-DDD` and wrapping into a new cycle every 1000 days. A "jump to cycle-day" field jumps the calendar straight to any `CC-DDD`.
+- **Breeding batches** — add a label, color, and first-service (AI) date. Each batch auto-projects farrowing (service + gestation, default 114 days) and weaning (farrowing + lactation, default 21 days), then chains the next service date (weaning + wean-to-service interval, default 5 days) and repeats indefinitely — so one entry tracks a sow group's whole reproductive cycle.
+- **Tap any day** to see its cycle-day and any breeding batch whose cycle covers it — service, farrowing, weaning, or "day N of gestation/lactation" — plus the full date set for that cycle.
+- Swipe left/right on the grid, or use the prev/next buttons, to change month.
+- Light/dark theme (system-aware, with a manual toggle), with settings and batches saved in the browser via `localStorage`.
+- Installable as a home-screen app; prompts to refresh when a new version is deployed.
 
 ## Running locally
 

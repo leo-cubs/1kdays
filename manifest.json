@@ -1,6 +1,6 @@
 {
-  "name": "Sow Calendar",
-  "short_name": "Sow Cal",
+  "name": "1KDays",
+  "short_name": "1KDays",
   "description": "Gregorian monthly calendar with the 1000-day (cycle-day) pig production count.",
   "start_url": ".",
   "scope": ".",
