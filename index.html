@@ -154,6 +154,7 @@
   .jump-row button { padding: 0 14px; height: 36px; border-radius: 10px; border: 1px solid var(--work); background: var(--work); color: var(--on-accent); font-weight: 700; font-size: .82rem; }
 
   .weekday-row, .month-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+  .month-grid { touch-action: pan-y; }
   .weekday-row div {
     text-align: center; font-size: .66rem; font-weight: 700; color: var(--muted);
     text-transform: uppercase; letter-spacing: .06em; padding: 2px 0;
@@ -946,9 +947,37 @@
   }
 
   mGrid.addEventListener("click", function (e) {
+    if (gridSwipe.suppressClick) { gridSwipe.suppressClick = false; return; }
     var cell = e.target.closest(".day-cell");
     if (!cell) return;
     openDaySheet(parseISO(cell.dataset.date));
+  });
+
+  // ---------- Swipe left/right on the grid to change month ----------
+  var gridSwipe = { active: false, moved: false, startX: 0, startY: 0, suppressClick: false };
+  mGrid.addEventListener("touchstart", function (e) {
+    if (e.touches.length !== 1) return;
+    gridSwipe.active = true;
+    gridSwipe.moved = false;
+    gridSwipe.startX = e.touches[0].clientX;
+    gridSwipe.startY = e.touches[0].clientY;
+  }, { passive: true });
+  mGrid.addEventListener("touchmove", function (e) {
+    if (!gridSwipe.active) return;
+    var dx = e.touches[0].clientX - gridSwipe.startX;
+    var dy = e.touches[0].clientY - gridSwipe.startY;
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) gridSwipe.moved = true;
+  }, { passive: true });
+  mGrid.addEventListener("touchend", function (e) {
+    if (!gridSwipe.active) return;
+    gridSwipe.active = false;
+    var dx = e.changedTouches[0].clientX - gridSwipe.startX;
+    var dy = e.changedTouches[0].clientY - gridSwipe.startY;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      gridSwipe.suppressClick = true;
+      monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() + (dx < 0 ? 1 : -1), 1);
+      renderMonth();
+    }
   });
 
   // ---------- Day detail sheet: tap any day to see its related breeding events ----------
