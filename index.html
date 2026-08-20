@@ -259,6 +259,14 @@
   .settings-header p { color: var(--muted); font-size: .85rem; margin-top: 2px; }
 
   .section-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .13em; font-weight: 700; color: var(--muted); padding: 0 2px; }
+  .history-toggle {
+    width: 100%; background: none; border: none; padding: 0 2px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .history-toggle .topbar-icon { width: 15px; height: 15px; transition: transform .15s ease; }
+  .history-toggle.open .topbar-icon { transform: rotate(90deg); }
+  .preset-card.completed { opacity: .55; }
+  .preset-card.completed .preset-swatch { filter: grayscale(60%); }
 
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 
@@ -544,7 +552,15 @@
     <div>
       <div class="section-label" style="margin-bottom:8px;">Breeding batches</div>
       <div class="preset-list" id="batchList"></div>
-      <div class="empty-note" id="batchEmptyNote" hidden>No batches yet — add a first-service date above to project farrowing, weaning, and repeat cycles on the calendar.</div>
+      <div class="empty-note" id="batchEmptyNote" hidden>No active batches — add a first-service date above to project farrowing and weaning on the calendar.</div>
+    </div>
+
+    <div id="historySection" hidden>
+      <button type="button" class="section-label history-toggle" id="historyToggle" style="margin-bottom:8px;">
+        <span id="historyToggleLabel">History (0)</span>
+        <svg class="topbar-icon" id="historyChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <div class="preset-list" id="historyList" hidden></div>
     </div>
   </main>
 
@@ -842,7 +858,8 @@
   // and auto-suggest the first free one (unless every color is taken, in
   // which case the restriction is lifted so adding a batch is never blocked).
   function syncColorPicks() {
-    var used = batches.map(function (b) { return b.color; });
+    var activeBatches = batches.filter(function (b) { return !isBatchCompleted(b); });
+    var used = activeBatches.map(function (b) { return b.color; });
     var free = COLORS.filter(function (c) { return used.indexOf(c) === -1; });
     var allTaken = free.length === 0;
     if (allTaken && used.indexOf(selectedColor) === -1) selectedColor = COLORS[0];
@@ -854,7 +871,7 @@
       btn.classList.toggle("selected", c === selectedColor);
       btn.disabled = isUsed;
       if (isUsed) {
-        var byBatch = batches.filter(function (b) { return b.color === c; })[0];
+        var byBatch = activeBatches.filter(function (b) { return b.color === c; })[0];
         btn.title = "Already used by " + (byBatch ? byBatch.label : "another batch");
       } else {
         btn.removeAttribute("title");
@@ -898,69 +915,82 @@
     return s.replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; });
   }
 
-  var batchList = document.getElementById("batchList");
-  var batchEmptyNote = document.getElementById("batchEmptyNote");
-  function renderBatchList() {
-    batchEmptyNote.hidden = batches.length > 0;
-    batchList.innerHTML = "";
-    batches.forEach(function (b) {
-      var sd = parseISO(b.serviceDate);
-      var fd = addDays(sd, settings.gestation);
-      var wd = addDays(fd, settings.lactation);
+  function buildBatchCard(b, completed) {
+    var c = batchCycle(b);
 
-      var card = document.createElement("div");
-      card.className = "preset-card";
+    var card = document.createElement("div");
+    card.className = "preset-card" + (completed ? " completed" : "");
 
-      var swatch = document.createElement("span");
-      swatch.className = "preset-swatch";
-      swatch.style.background = b.color;
+    var swatch = document.createElement("span");
+    swatch.className = "preset-swatch";
+    swatch.style.background = b.color;
 
-      var main = document.createElement("div");
-      main.className = "preset-main";
-      main.innerHTML = '<div class="pname"></div><div class="pmeta"></div>';
-      main.querySelector(".pname").textContent = b.label;
-      main.querySelector(".pmeta").textContent = "S " + fmtShortWithCycle(sd) + " · F " + fmtShortWithCycle(fd) + " · W " + fmtShortWithCycle(wd);
+    var main = document.createElement("div");
+    main.className = "preset-main";
+    main.innerHTML = '<div class="pname"></div><div class="pmeta"></div>';
+    main.querySelector(".pname").textContent = b.label;
+    main.querySelector(".pmeta").textContent = "S " + fmtShortWithCycle(c.service) + " · F " + fmtShortWithCycle(c.farrow) + " · W " + fmtShortWithCycle(c.wean);
 
-      var del = document.createElement("button");
-      del.className = "preset-del";
-      del.textContent = "✕";
-      del.setAttribute("aria-label", "Delete " + b.label);
-      var confirmTimer = null;
-      del.addEventListener("click", function () {
-        if (del.classList.contains("confirm")) {
-          clearTimeout(confirmTimer);
-          deleteBatch(b.id);
-        } else {
-          del.classList.add("confirm");
-          del.textContent = "Delete?";
-          confirmTimer = setTimeout(function () { del.classList.remove("confirm"); del.textContent = "✕"; }, 2500);
-        }
-      });
-
-      card.appendChild(swatch);
-      card.appendChild(main);
-      card.appendChild(del);
-      batchList.appendChild(card);
+    var del = document.createElement("button");
+    del.className = "preset-del";
+    del.textContent = "✕";
+    del.setAttribute("aria-label", "Delete " + b.label);
+    var confirmTimer = null;
+    del.addEventListener("click", function () {
+      if (del.classList.contains("confirm")) {
+        clearTimeout(confirmTimer);
+        deleteBatch(b.id);
+      } else {
+        del.classList.add("confirm");
+        del.textContent = "Delete?";
+        confirmTimer = setTimeout(function () { del.classList.remove("confirm"); del.textContent = "✕"; }, 2500);
+      }
     });
+
+    card.appendChild(swatch);
+    card.appendChild(main);
+    card.appendChild(del);
+    return card;
   }
 
-  /* compute a batch's breeding cycles (service -> farrow -> wean -> next service,
-     chained as far as needed) whose [service, wean] window overlaps
-     [rangeStart, rangeEnd] inclusive */
-  function batchCycles(batch, rangeStart, rangeEnd) {
-    var cycles = [];
-    var cursor = parseISO(batch.serviceDate);
-    var safety = 0;
-    while (cursor.getTime() <= rangeEnd.getTime() && safety < 200) {
-      safety++;
-      var farrow = addDays(cursor, settings.gestation);
-      var wean = addDays(farrow, settings.lactation);
-      if (wean.getTime() >= rangeStart.getTime()) {
-        cycles.push({ service: cursor, farrow: farrow, wean: wean, batch: batch });
-      }
-      cursor = addDays(wean, settings.wsi);
-    }
-    return cycles;
+  var batchList = document.getElementById("batchList");
+  var batchEmptyNote = document.getElementById("batchEmptyNote");
+  var historySection = document.getElementById("historySection");
+  var historyList = document.getElementById("historyList");
+  var historyToggle = document.getElementById("historyToggle");
+  var historyToggleLabel = document.getElementById("historyToggleLabel");
+
+  function renderBatchList() {
+    var active = batches.filter(function (b) { return !isBatchCompleted(b); });
+    var history = batches.filter(isBatchCompleted);
+
+    batchEmptyNote.hidden = active.length > 0;
+    batchList.innerHTML = "";
+    active.forEach(function (b) { batchList.appendChild(buildBatchCard(b, false)); });
+
+    historySection.hidden = history.length === 0;
+    historyToggleLabel.textContent = "History (" + history.length + ")";
+    historyList.innerHTML = "";
+    history.forEach(function (b) { historyList.appendChild(buildBatchCard(b, true)); });
+  }
+  historyToggle.addEventListener("click", function () {
+    var open = historyList.hidden;
+    historyList.hidden = !open;
+    historyToggle.classList.toggle("open", open);
+  });
+
+  /* Each batch represents one breeding cycle: service -> farrow -> wean.
+     (Wean-to-service is kept as a setting purely as a reference interval —
+     it no longer auto-chains a new cycle; once a batch's cycle finishes,
+     it's done, and re-breeding that sow group means adding a new batch.) */
+  function batchCycle(batch) {
+    var service = parseISO(batch.serviceDate);
+    var farrow = addDays(service, settings.gestation);
+    var wean = addDays(farrow, settings.lactation);
+    return { service: service, farrow: farrow, wean: wean, batch: batch };
+  }
+  function isBatchCompleted(batch) {
+    return today.getTime() > batchCycle(batch).wean.getTime();
   }
   function eventLabel(t) { return t==="S" ? "Service" : t==="F" ? "Farrowing" : "Weaning"; }
 
@@ -1021,17 +1051,16 @@
     }
     var win = settings.gestationWindow;
     batches.forEach(function (b) {
-      batchCycles(b, gridStart, gridEnd).forEach(function (c) {
-        [["S",c.service],["F",c.farrow],["W",c.wean]].forEach(function (pair) {
-          addEvent(pair[1], pair[0], b, false);
-        });
-        // farrowing window: mark the days around the expected farrowing date
-        // (biological gestation length varies) with a faded "F" in the same batch color
-        for (var off = -win; off <= win; off++) {
-          if (off === 0) continue;
-          addEvent(addDays(c.farrow, off), "F", b, true);
-        }
+      var c = batchCycle(b);
+      [["S",c.service],["F",c.farrow],["W",c.wean]].forEach(function (pair) {
+        addEvent(pair[1], pair[0], b, false);
       });
+      // farrowing window: mark the days around the expected farrowing date
+      // (biological gestation length varies) with a faded "F" in the same batch color
+      for (var off = -win; off <= win; off++) {
+        if (off === 0) continue;
+        addEvent(addDays(c.farrow, off), "F", b, true);
+      }
     });
 
     var html = "";
@@ -1143,7 +1172,8 @@
 
     var cycles = [];
     batches.forEach(function (b) {
-      batchCycles(b, date, date).forEach(function (c) { cycles.push(c); });
+      var c = batchCycle(b);
+      if (date.getTime() >= c.service.getTime() && date.getTime() <= c.wean.getTime()) cycles.push(c);
     });
 
     if (cycles.length === 0) {
