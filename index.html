@@ -322,6 +322,11 @@
   .color-picks { display: flex; gap: 6px; flex-wrap: wrap; }
   .color-pick { width: 26px; height: 26px; border-radius: 8px; border: 2px solid transparent; }
   .color-pick.selected { border-color: var(--text); }
+  .color-pick.disabled { opacity: .22; cursor: not-allowed; position: relative; }
+  .color-pick.disabled::after {
+    content: ""; position: absolute; inset: 0; border-radius: 6px;
+    background: repeating-linear-gradient(45deg, rgba(0,0,0,.55) 0 2px, transparent 2px 5px);
+  }
 
   .preset-list { display: flex; flex-direction: column; gap: 8px; }
   .preset-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
@@ -818,18 +823,45 @@
   // ---------- Settings view: batches ----------
   var colorPicksEl = document.getElementById("colorPicks");
   var selectedColor = COLORS[0];
-  COLORS.forEach(function (c, idx) {
+  var colorPickBtns = COLORS.map(function (c) {
     var b = document.createElement("button");
     b.type = "button";
-    b.className = "color-pick" + (idx===0 ? " selected" : "");
+    b.className = "color-pick";
     b.style.background = c;
     b.addEventListener("click", function () {
+      if (b.classList.contains("disabled")) return;
       selectedColor = c;
-      Array.prototype.forEach.call(colorPicksEl.children, function (ch) { ch.classList.remove("selected"); });
-      b.classList.add("selected");
+      syncColorPicks();
     });
     colorPicksEl.appendChild(b);
+    return b;
   });
+
+  // Batch colors should be unique so batches stay visually distinguishable
+  // on the calendar. Disable swatches already claimed by another batch,
+  // and auto-suggest the first free one (unless every color is taken, in
+  // which case the restriction is lifted so adding a batch is never blocked).
+  function syncColorPicks() {
+    var used = batches.map(function (b) { return b.color; });
+    var free = COLORS.filter(function (c) { return used.indexOf(c) === -1; });
+    var allTaken = free.length === 0;
+    if (allTaken && used.indexOf(selectedColor) === -1) selectedColor = COLORS[0];
+    if (!allTaken && used.indexOf(selectedColor) !== -1) selectedColor = free[0];
+    colorPickBtns.forEach(function (btn, idx) {
+      var c = COLORS[idx];
+      var isUsed = !allTaken && used.indexOf(c) !== -1;
+      btn.classList.toggle("disabled", isUsed);
+      btn.classList.toggle("selected", c === selectedColor);
+      btn.disabled = isUsed;
+      if (isUsed) {
+        var byBatch = batches.filter(function (b) { return b.color === c; })[0];
+        btn.title = "Already used by " + (byBatch ? byBatch.label : "another batch");
+      } else {
+        btn.removeAttribute("title");
+      }
+    });
+  }
+  syncColorPicks();
 
   var batchLabelInp = document.getElementById("batchLabel");
   var batchDateInp = document.getElementById("batchDate");
@@ -844,6 +876,7 @@
     persistBatches();
     batchLabelInp.value = "";
     renderBatchList();
+    syncColorPicks();
     var sd = parseISO(dateVal);
     monthCursor = new Date(sd.getFullYear(), sd.getMonth(), 1);
     showView("cal");
@@ -853,6 +886,7 @@
     batches = batches.filter(function (b) { return b.id !== id; });
     persistBatches();
     renderBatchList();
+    syncColorPicks();
   }
 
   function fmtShort(dt) { return dt.getDate() + " " + MONTHSHORT[dt.getMonth()]; }
