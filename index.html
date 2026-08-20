@@ -387,7 +387,7 @@
 
     <div class="key-legend">
       <span><i>S</i> Service / AI</span>
-      <span><i>F</i> Farrowing (~term)</span>
+      <span><i>F</i> Farrowing</span>
       <span><i>W</i> Weaning</span>
     </div>
   </main>
@@ -873,9 +873,14 @@
     monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
     renderMonth();
   });
+  var jumpInp = document.getElementById("jumpInp");
+  jumpInp.addEventListener("input", function () {
+    var digits = jumpInp.value.replace(/[^0-9]/g, "").slice(0, 5);
+    jumpInp.value = digits.length > 2 ? digits.slice(0,2) + "-" + digits.slice(2) : digits;
+  });
   document.getElementById("jumpForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    var idx = parseCycleDay(document.getElementById("jumpInp").value);
+    var idx = parseCycleDay(jumpInp.value);
     if (idx === null) return;
     var target = addDays(parseISO(settings.epoch), idx);
     monthCursor = new Date(target.getFullYear(), target.getMonth(), 1);
