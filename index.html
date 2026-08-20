@@ -286,6 +286,11 @@
     border: 1px solid var(--border); background: var(--surface-2); border-radius: 10px;
     padding: 7px 9px; font-weight: 700; font-size: .85rem;
   }
+  .field-warning {
+    padding: 10px 14px 13px; font-size: .76rem; font-weight: 600; line-height: 1.4;
+    color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent);
+    border-top: 1px solid var(--border);
+  }
 
   .seg-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 14px; }
   .seg-btn {
@@ -460,6 +465,7 @@
           </div>
           <input type="date" id="epochInp">
         </div>
+        <div class="field-warning">⚠️ Changing this shifts the cycle-day (CC-DDD) label shown on every date across the whole calendar — it does not change any Gregorian dates or batches, only how days are numbered.</div>
       </div>
     </div>
 
@@ -745,7 +751,11 @@
   var epochInp = document.getElementById("epochInp");
   epochInp.value = settings.epoch;
   epochInp.addEventListener("change", function () {
-    settings.epoch = epochInp.value || settings.epoch;
+    var newVal = epochInp.value;
+    if (!newVal || newVal === settings.epoch) return;
+    var ok = window.confirm("Changing the Cycle 00 / Day 000 date will shift the cycle-day (CC-DDD) label shown on every date across the whole calendar.\n\nGregorian dates and saved batches are not affected — only how days are numbered.\n\nContinue?");
+    if (!ok) { epochInp.value = settings.epoch; return; }
+    settings.epoch = newVal;
     persistSettings();
   });
 
