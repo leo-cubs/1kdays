@@ -4,6 +4,10 @@
 <title>Sow Calendar</title>
 <meta name="description" content="Gregorian monthly calendar with the 1000-day (cycle-day) pig production count, configurable week start.">
 
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -155,13 +159,16 @@
     text-transform: uppercase; letter-spacing: .06em; padding: 2px 0;
   }
   .day-cell {
+    -webkit-appearance: none; appearance: none; border: none; width: 100%;
     min-height: 68px;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     gap: 2px; padding: 7px 2px 6px;
     border-radius: 12px;
     background: var(--surface-2);
     position: relative;
+    transition: transform .08s ease;
   }
+  .day-cell:active { transform: scale(.94); }
   .day-cell .datenum { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.05rem; line-height: 1; font-variant-numeric: tabular-nums; }
   .day-cell .cycletag { font-size: .62rem; font-weight: 700; color: var(--muted); letter-spacing: .01em; font-variant-numeric: tabular-nums; }
   .day-cell.outside { opacity: .38; }
@@ -179,6 +186,32 @@
   .key-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: .72rem; color: var(--muted); font-weight: 600; }
   .key-legend span { display: inline-flex; align-items: center; gap: 5px; }
   .key-legend i { width: 13px; height: 13px; border-radius: 4px; display: inline-block; font-style: normal; color: #fff; font-size: .55rem; font-weight: 800; text-align: center; line-height: 13px; }
+
+  /* ---------- Day detail sheet ---------- */
+  .sheet-backdrop {
+    position: fixed; inset: 0; background: rgba(10,12,16,.5);
+    opacity: 0; pointer-events: none; transition: opacity .18s ease; z-index: 20;
+  }
+  .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+  .day-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px;
+    background: var(--surface); border-radius: 20px 20px 0 0; box-shadow: var(--shadow);
+    padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
+    max-height: 78dvh; overflow-y: auto;
+    transform: translateY(100%); transition: transform .22s ease; z-index: 21;
+  }
+  .day-sheet.open { transform: translateY(0); }
+  .day-sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .day-sheet-date { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.4rem; }
+  .day-sheet-cycle { font-size: .8rem; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 1px; }
+  .day-cycle-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .day-cycle-card + .day-cycle-card { margin-top: 8px; }
+  .day-cycle-top { display: flex; align-items: center; gap: 8px; }
+  .day-cycle-top .swatch { width: 11px; height: 11px; border-radius: 4px; flex: 0 0 auto; }
+  .day-cycle-top .label { font-weight: 700; font-size: .9rem; flex: 1; }
+  .day-cycle-status { font-size: .8rem; font-weight: 700; }
+  .day-cycle-dates { font-size: .76rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .day-cycle-dates strong { color: var(--text); }
 
   /* ---------- Settings view ---------- */
   .settings-view { overflow-y: auto; padding: 4px 16px calc(20px + env(safe-area-inset-bottom)); gap: 20px; display: flex; flex-direction: column; }
@@ -267,10 +300,21 @@
       <span class="brand-mark" id="topbarTitle">Sow Calendar</span>
     </div>
     <div class="topbar-actions">
+      <button class="icon-btn" id="themeToggleBtn" aria-label="Switch to dark theme">
+        <svg class="topbar-icon" id="themeToggleIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg>
+      </button>
       <button class="icon-btn" id="settingsBtn" aria-label="Open settings">
         <svg class="topbar-icon" id="settingsIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+          <circle cx="12" cy="12" r="6.2"/>
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+          <g fill="currentColor" stroke="none">
+            <rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7"/>
+            <rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(60 12 12)"/>
+            <rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(120 12 12)"/>
+            <rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(180 12 12)"/>
+            <rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(240 12 12)"/>
+            <rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(300 12 12)"/>
+          </g>
         </svg>
       </button>
     </div>
@@ -404,6 +448,20 @@
     </div>
   </main>
 
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <div class="day-sheet" id="daySheet">
+    <div class="day-sheet-head">
+      <div>
+        <div class="day-sheet-date" id="daySheetDate">Thu, 20 Aug</div>
+        <div class="day-sheet-cycle" id="daySheetCycle">20-051</div>
+      </div>
+      <button class="icon-btn" id="daySheetClose" aria-label="Close">
+        <svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div id="daySheetBody"></div>
+  </div>
+
 </div>
 
 <script>
@@ -500,6 +558,34 @@
     if (t === "system") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
   }
+  function effectiveDark() {
+    if (settings.theme === "dark") return true;
+    if (settings.theme === "light") return false;
+    return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+
+  var SUN_ICON = '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/>';
+  var MOON_ICON = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/>';
+
+  var themeToggleBtn = document.getElementById("themeToggleBtn");
+  var themeToggleIcon = document.getElementById("themeToggleIcon");
+  function syncThemeToggleIcon() {
+    var dark = effectiveDark();
+    themeToggleIcon.innerHTML = dark ? SUN_ICON : MOON_ICON;
+    themeToggleBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  }
+  themeToggleBtn.addEventListener("click", function () {
+    settings.theme = effectiveDark() ? "light" : "dark";
+    persistSettings();
+    applyTheme();
+    syncThemeToggleIcon();
+    syncThemeRow();
+  });
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+      if (settings.theme === "system") syncThemeToggleIcon();
+    });
+  }
 
   // ---------- view switching ----------
   var app = document.getElementById("app");
@@ -509,7 +595,7 @@
   var settingsIcon = document.getElementById("settingsIcon");
   var topbarTitle = document.getElementById("topbarTitle");
 
-  var GEAR_ICON = '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>';
+  var GEAR_ICON = '<circle cx="12" cy="12" r="6.2"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><g fill="currentColor" stroke="none"><rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7"/><rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(60 12 12)"/><rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(120 12 12)"/><rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(180 12 12)"/><rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(240 12 12)"/><rect x="18.3" y="10.7" width="3" height="2.6" rx="0.7" transform="rotate(300 12 12)"/></g>';
   var BACK_ICON = '<path d="M15 5l-7 7 7 7"/>';
 
   function showView(v) {
@@ -560,6 +646,7 @@
       persistSettings();
       applyTheme();
       syncThemeRow();
+      syncThemeToggleIcon();
     });
     themeRow.appendChild(b);
   });
@@ -703,22 +790,23 @@
     });
   }
 
-  /* compute S/F/W events for a batch that fall within [rangeStart, rangeEnd] inclusive,
-     chaining repeat cycles (service -> farrow -> wean -> next service) as far as needed */
-  function batchEventsInRange(batch, rangeStart, rangeEnd) {
-    var events = [];
+  /* compute a batch's breeding cycles (service -> farrow -> wean -> next service,
+     chained as far as needed) whose [service, wean] window overlaps
+     [rangeStart, rangeEnd] inclusive */
+  function batchCycles(batch, rangeStart, rangeEnd) {
+    var cycles = [];
     var cursor = parseISO(batch.serviceDate);
     var safety = 0;
     while (cursor.getTime() <= rangeEnd.getTime() && safety < 200) {
       safety++;
       var farrow = addDays(cursor, settings.gestation);
       var wean = addDays(farrow, settings.lactation);
-      if (cursor.getTime() >= rangeStart.getTime() && cursor.getTime() <= rangeEnd.getTime()) events.push({date:cursor, type:"S", batch:batch});
-      if (farrow.getTime() >= rangeStart.getTime() && farrow.getTime() <= rangeEnd.getTime()) events.push({date:farrow, type:"F", batch:batch});
-      if (wean.getTime() >= rangeStart.getTime() && wean.getTime() <= rangeEnd.getTime()) events.push({date:wean, type:"W", batch:batch});
+      if (wean.getTime() >= rangeStart.getTime()) {
+        cycles.push({ service: cursor, farrow: farrow, wean: wean, batch: batch });
+      }
       cursor = addDays(wean, settings.wsi);
     }
-    return events;
+    return cycles;
   }
   function eventLabel(t) { return t==="S" ? "Service" : t==="F" ? "Farrowing" : "Weaning"; }
 
@@ -767,10 +855,14 @@
 
     var eventsByDate = {};
     batches.forEach(function (b) {
-      batchEventsInRange(b, gridStart, gridEnd).forEach(function (ev) {
-        var key = isoDate(ev.date);
-        if (!eventsByDate[key]) eventsByDate[key] = [];
-        eventsByDate[key].push(ev);
+      batchCycles(b, gridStart, gridEnd).forEach(function (c) {
+        [["S",c.service],["F",c.farrow],["W",c.wean]].forEach(function (pair) {
+          var type = pair[0], date = pair[1];
+          if (date.getTime() < gridStart.getTime() || date.getTime() > gridEnd.getTime()) return;
+          var key = isoDate(date);
+          if (!eventsByDate[key]) eventsByDate[key] = [];
+          eventsByDate[key].push({date:date, type:type, batch:b});
+        });
       });
     });
 
@@ -794,17 +886,90 @@
         }).join("") + '</div>';
       }
 
-      html += '<div class="'+cls+'">'
+      html += '<button type="button" class="'+cls+'" data-date="'+key+'">'
         + '<div class="datenum">'+cellDate.getDate()+'</div>'
         + '<div class="cycletag">'+cycleDayLabel(cycleDayIndex(epoch, cellDate))+'</div>'
         + marksHtml
-        + '</div>';
+        + '</button>';
     }
     mGrid.innerHTML = html;
   }
 
+  mGrid.addEventListener("click", function (e) {
+    var cell = e.target.closest(".day-cell");
+    if (!cell) return;
+    openDaySheet(parseISO(cell.dataset.date));
+  });
+
+  // ---------- Day detail sheet: tap any day to see its related breeding events ----------
+  var sheetBackdrop = document.getElementById("sheetBackdrop");
+  var daySheet = document.getElementById("daySheet");
+  var daySheetDate = document.getElementById("daySheetDate");
+  var daySheetCycle = document.getElementById("daySheetCycle");
+  var daySheetBody = document.getElementById("daySheetBody");
+
+  function closeDaySheet() {
+    sheetBackdrop.classList.remove("open");
+    daySheet.classList.remove("open");
+  }
+  document.getElementById("daySheetClose").addEventListener("click", closeDaySheet);
+  sheetBackdrop.addEventListener("click", closeDaySheet);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDaySheet(); });
+
+  function cycleStatus(cycle, date) {
+    if (isSameDay(date, cycle.service)) return "Service / AI";
+    if (isSameDay(date, cycle.farrow)) return "Farrowing";
+    if (isSameDay(date, cycle.wean)) return "Weaning";
+    if (date.getTime() > cycle.service.getTime() && date.getTime() < cycle.farrow.getTime())
+      return "Day " + daysBetween(cycle.service, date) + " of gestation";
+    if (date.getTime() > cycle.farrow.getTime() && date.getTime() < cycle.wean.getTime())
+      return "Day " + daysBetween(cycle.farrow, date) + " of lactation";
+    return "";
+  }
+  function datesLine(cycle, date) {
+    function part(label, d) {
+      var txt = label + " " + fmtShort(d);
+      return isSameDay(date, d) ? "<strong>" + txt + "</strong>" : txt;
+    }
+    return part("S", cycle.service) + " · " + part("F", cycle.farrow) + " · " + part("W", cycle.wean);
+  }
+
+  function openDaySheet(date) {
+    var epoch = parseISO(settings.epoch);
+    daySheetDate.textContent = DAYNAMES[date.getDay()] + ", " + date.getDate() + " " + MONTHNAMES[date.getMonth()] + " " + date.getFullYear();
+    daySheetCycle.textContent = cycleDayLabel(cycleDayIndex(epoch, date));
+
+    var cycles = [];
+    batches.forEach(function (b) {
+      batchCycles(b, date, date).forEach(function (c) { cycles.push(c); });
+    });
+
+    if (cycles.length === 0) {
+      daySheetBody.innerHTML = '<div class="empty-note" style="padding:2px 2px 12px;">No breeding events on this day.</div>'
+        + '<button class="save-btn" id="daySheetAddBatch" style="width:100%; height:44px;">Add a batch starting here</button>';
+      document.getElementById("daySheetAddBatch").addEventListener("click", function () {
+        closeDaySheet();
+        batchDateInp.value = isoDate(date);
+        showView("settings");
+        batchLabelInp.focus();
+      });
+    } else {
+      daySheetBody.innerHTML = cycles.map(function (c) {
+        return '<div class="day-cycle-card">'
+          + '<div class="day-cycle-top"><span class="swatch" style="background:'+c.batch.color+'"></span><span class="label">'+escapeHtml(c.batch.label)+'</span></div>'
+          + '<div class="day-cycle-status">'+cycleStatus(c, date)+'</div>'
+          + '<div class="day-cycle-dates">'+datesLine(c, date)+'</div>'
+          + '</div>';
+      }).join("");
+    }
+
+    sheetBackdrop.classList.add("open");
+    daySheet.classList.add("open");
+  }
+
   // ---------- init ----------
   applyTheme();
+  syncThemeToggleIcon();
   syncWeekStartRow();
   syncThemeRow();
   syncTimingFields();
