@@ -219,10 +219,12 @@
     font-size: .58rem; font-weight: 800; color: #fff;
     border-radius: 4px; padding: 1px 3px; line-height: 1.3;
   }
+  .mark.faded { opacity: .38; }
 
   .key-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: .72rem; color: var(--muted); font-weight: 600; }
   .key-legend span { display: inline-flex; align-items: center; gap: 5px; }
   .key-legend i { width: 13px; height: 13px; border-radius: 4px; display: inline-block; font-style: normal; color: var(--text); font-size: .55rem; font-weight: 800; text-align: center; line-height: 11px; border: 1.5px solid var(--muted); }
+  .key-legend i.faded { opacity: .5; border-style: dashed; }
 
   /* ---------- Day detail sheet ---------- */
   .sheet-backdrop {
@@ -432,6 +434,7 @@
       <span><i>S</i> Service / AI</span>
       <span><i>F</i> Farrowing</span>
       <span><i>W</i> Weaning</span>
+      <span><i class="faded">F</i> Farrowing window</span>
     </div>
   </main>
 
@@ -481,6 +484,17 @@
             <button data-dir="-1" aria-label="Decrease gestation days">−</button>
             <span class="value" id="gestationVal">114d</span>
             <button data-dir="1" aria-label="Increase gestation days">+</button>
+          </div>
+        </div>
+        <div class="stepper-row">
+          <div>
+            <div class="label">Farrowing window</div>
+            <div class="caption">Days marked before/after the expected date</div>
+          </div>
+          <div class="stepper" data-field="gestationWindow">
+            <button data-dir="-1" aria-label="Decrease farrowing window days">−</button>
+            <span class="value" id="gestationWindowVal">±3d</span>
+            <button data-dir="1" aria-label="Increase farrowing window days">+</button>
           </div>
         </div>
         <div class="stepper-row">
@@ -579,13 +593,14 @@
   var DEFAULT_EPOCH = "1971-09-27";
 
   var LIMITS = {
-    gestation: { min: 90, max: 130, step: 1 },
-    lactation: { min: 14, max: 35, step: 1 },
-    wsi:       { min: 3,  max: 14,  step: 1 }
+    gestation:       { min: 90, max: 130, step: 1 },
+    gestationWindow: { min: 0,  max: 10,  step: 1 },
+    lactation:       { min: 14, max: 35,  step: 1 },
+    wsi:             { min: 3,  max: 14,  step: 1 }
   };
 
   function defaultSettings() {
-    return { weekStart: 1, theme: "system", epoch: DEFAULT_EPOCH, gestation: 114, lactation: 21, wsi: 5 };
+    return { weekStart: 1, theme: "system", epoch: DEFAULT_EPOCH, gestation: 114, gestationWindow: 3, lactation: 21, wsi: 5 };
   }
   function clamp(val, field) {
     var l = LIMITS[field];
@@ -761,10 +776,12 @@
 
   // ---------- Settings view: breeding-timing steppers ----------
   var gestationVal = document.getElementById("gestationVal");
+  var gestationWindowVal = document.getElementById("gestationWindowVal");
   var lactationVal = document.getElementById("lactationVal");
   var wsiVal = document.getElementById("wsiVal");
   function syncTimingFields() {
     gestationVal.textContent = settings.gestation + "d";
+    gestationWindowVal.textContent = "±" + settings.gestationWindow + "d";
     lactationVal.textContent = settings.lactation + "d";
     wsiVal.textContent = settings.wsi + "d";
     renderBatchList();
@@ -962,15 +979,24 @@
     var gridEnd = addDays(gridStart, totalCells-1);
 
     var eventsByDate = {};
+    function addEvent(date, type, batch, faded) {
+      if (date.getTime() < gridStart.getTime() || date.getTime() > gridEnd.getTime()) return;
+      var key = isoDate(date);
+      if (!eventsByDate[key]) eventsByDate[key] = [];
+      eventsByDate[key].push({date:date, type:type, batch:batch, faded:!!faded});
+    }
+    var win = settings.gestationWindow;
     batches.forEach(function (b) {
       batchCycles(b, gridStart, gridEnd).forEach(function (c) {
         [["S",c.service],["F",c.farrow],["W",c.wean]].forEach(function (pair) {
-          var type = pair[0], date = pair[1];
-          if (date.getTime() < gridStart.getTime() || date.getTime() > gridEnd.getTime()) return;
-          var key = isoDate(date);
-          if (!eventsByDate[key]) eventsByDate[key] = [];
-          eventsByDate[key].push({date:date, type:type, batch:b});
+          addEvent(pair[1], pair[0], b, false);
         });
+        // farrowing window: mark the days around the expected farrowing date
+        // (biological gestation length varies) with a faded "F" in the same batch color
+        for (var off = -win; off <= win; off++) {
+          if (off === 0) continue;
+          addEvent(addDays(c.farrow, off), "F", b, true);
+        }
       });
     });
 
@@ -990,7 +1016,9 @@
       var marksHtml = "";
       if (eventsByDate[key]) {
         marksHtml = '<div class="marks">' + eventsByDate[key].map(function (ev) {
-          return '<span class="mark" style="background:'+ev.batch.color+'" title="'+escapeHtml(ev.batch.label)+' · '+eventLabel(ev.type)+'">'+ev.type+'</span>';
+          var cls = "mark" + (ev.faded ? " faded" : "");
+          var desc = ev.faded ? "Possible farrowing (±" + win + "d window)" : eventLabel(ev.type);
+          return '<span class="'+cls+'" style="background:'+ev.batch.color+'" title="'+escapeHtml(ev.batch.label)+' · '+desc+'">'+ev.type+'</span>';
         }).join("") + '</div>';
       }
 
@@ -1056,6 +1084,10 @@
     if (isSameDay(date, cycle.service)) return "Service / AI";
     if (isSameDay(date, cycle.farrow)) return "Farrowing";
     if (isSameDay(date, cycle.wean)) return "Weaning";
+    var win = settings.gestationWindow;
+    var offFarrow = daysBetween(cycle.farrow, date);
+    if (win > 0 && Math.abs(offFarrow) <= win)
+      return "Possible farrowing window (" + (offFarrow > 0 ? "+" : "") + offFarrow + "d)";
     if (date.getTime() > cycle.service.getTime() && date.getTime() < cycle.farrow.getTime())
       return "Day " + daysBetween(cycle.service, date) + " of gestation";
     if (date.getTime() > cycle.farrow.getTime() && date.getTime() < cycle.wean.getTime())
