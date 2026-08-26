@@ -35,6 +35,7 @@
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Any (web browser)",
   "isAccessibleForFree": true,
+  "inLanguage": ["en", "es", "pt"],
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
@@ -222,7 +223,7 @@
   .mark.faded { opacity: .38; }
 
   .key-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: .72rem; color: var(--muted); font-weight: 600; }
-  .key-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .key-legend span.leg { display: inline-flex; align-items: center; gap: 5px; }
   .key-legend i { width: 13px; height: 13px; border-radius: 4px; display: inline-block; font-style: normal; color: var(--text); font-size: .55rem; font-weight: 800; text-align: center; line-height: 11px; border: 1.5px solid var(--muted); }
   .key-legend i.faded { opacity: .5; border-style: dashed; }
 
@@ -435,63 +436,70 @@
     </div>
 
     <form class="jump-row" id="jumpForm">
-      <label for="jumpInp">Jump to cycle-day</label>
+      <label for="jumpInp" id="jumpLabel">Jump to cycle-day</label>
       <input type="text" id="jumpInp" placeholder="20-051" pattern="\d{1,2}-\d{1,3}" inputmode="numeric">
-      <button type="submit">Go</button>
+      <button type="submit" id="jumpGoBtn">Go</button>
     </form>
 
     <div class="weekday-row" id="mWeekdays"></div>
     <div class="month-grid" id="mGrid"></div>
 
     <div class="key-legend">
-      <span><i>S</i> Service / AI</span>
-      <span><i>F</i> Farrowing</span>
-      <span><i>W</i> Weaning</span>
-      <span><i class="faded">F</i> Farrowing window</span>
+      <span class="leg"><i id="legIconS">S</i><span id="legTextS">Service / AI</span></span>
+      <span class="leg"><i id="legIconF">F</i><span id="legTextF">Farrowing</span></span>
+      <span class="leg"><i id="legIconW">W</i><span id="legTextW">Weaning</span></span>
+      <span class="leg"><i class="faded" id="legIconFwin">F</i><span id="legTextFwin">Farrowing window</span></span>
     </div>
   </main>
 
   <main class="view settings-view" id="settingsView" hidden>
     <div class="settings-header">
-      <h2>Settings</h2>
-      <p>Calendar display, the 1000-day count, and breeding batches.</p>
+      <h2 id="settingsTitleText">Settings</h2>
+      <p id="settingsSubtitleText">Calendar display, the 1000-day count, and breeding batches.</p>
     </div>
 
     <div>
-      <div class="section-label" style="margin-bottom:8px;">Week starts on</div>
+      <div class="section-label" id="weekStartsOnLabel" style="margin-bottom:8px;">Week starts on</div>
       <div class="card">
         <div class="seg-row" id="weekStartRow"></div>
       </div>
     </div>
 
     <div>
-      <div class="section-label" style="margin-bottom:8px;">Theme</div>
+      <div class="section-label" id="themeLabel" style="margin-bottom:8px;">Theme</div>
       <div class="card">
         <div class="seg-row" id="themeRow"></div>
       </div>
     </div>
 
     <div>
-      <div class="section-label" style="margin-bottom:8px;">1000-day count</div>
+      <div class="section-label" id="languageLabel" style="margin-bottom:8px;">Language</div>
       <div class="card">
-        <div class="field-row">
-          <div>
-            <div class="label">Cycle 00 / Day 000 date</div>
-            <div class="caption">Reference date the CC-DDD count starts from</div>
-          </div>
-          <input type="date" id="epochInp">
-        </div>
-        <div class="field-warning">⚠️ Changing this shifts the cycle-day (CC-DDD) label shown on every date across the whole calendar — it does not change any Gregorian dates or batches, only how days are numbered.</div>
+        <div class="seg-row" id="langRow"></div>
       </div>
     </div>
 
     <div>
-      <div class="section-label" style="margin-bottom:8px;">Breeding cycle timing</div>
+      <div class="section-label" id="cycleCountLabel" style="margin-bottom:8px;">1000-day count</div>
+      <div class="card">
+        <div class="field-row">
+          <div>
+            <div class="label" id="epochFieldLabel">Cycle 00 / Day 000 date</div>
+            <div class="caption" id="epochFieldCaption">Reference date the CC-DDD count starts from</div>
+          </div>
+          <input type="date" id="epochInp">
+        </div>
+        <div class="field-warning" id="epochWarningText">⚠️ Changing this shifts the cycle-day (CC-DDD) label shown on every date across the whole calendar — it does not change any Gregorian dates or batches, only how days are numbered.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" id="timingLabel" style="margin-bottom:8px;">Breeding cycle timing</div>
       <div class="card">
         <div class="stepper-row">
           <div>
-            <div class="label">Gestation</div>
-            <div class="caption">Service → farrowing</div>
+            <div class="label" id="gestationFieldLabel">Gestation</div>
+            <div class="caption" id="gestationFieldCaption">Service → farrowing</div>
           </div>
           <div class="stepper" data-field="gestation">
             <button data-dir="-1" aria-label="Decrease gestation days">−</button>
@@ -501,8 +509,8 @@
         </div>
         <div class="stepper-row">
           <div>
-            <div class="label">Farrowing window</div>
-            <div class="caption">Days marked before/after the expected date</div>
+            <div class="label" id="windowFieldLabel">Farrowing window</div>
+            <div class="caption" id="windowFieldCaption">Days marked before/after the expected date</div>
           </div>
           <div class="stepper" data-field="gestationWindow">
             <button data-dir="-1" aria-label="Decrease farrowing window days">−</button>
@@ -512,8 +520,8 @@
         </div>
         <div class="stepper-row">
           <div>
-            <div class="label">Lactation</div>
-            <div class="caption">Farrowing → weaning</div>
+            <div class="label" id="lactationFieldLabel">Lactation</div>
+            <div class="caption" id="lactationFieldCaption">Farrowing → weaning</div>
           </div>
           <div class="stepper" data-field="lactation">
             <button data-dir="-1" aria-label="Decrease lactation days">−</button>
@@ -523,8 +531,8 @@
         </div>
         <div class="stepper-row">
           <div>
-            <div class="label">Wean-to-service</div>
-            <div class="caption">Weaning → next service</div>
+            <div class="label" id="wsiFieldLabel">Wean-to-service</div>
+            <div class="caption" id="wsiFieldCaption">Weaning → next service</div>
           </div>
           <div class="stepper" data-field="wsi">
             <button data-dir="-1" aria-label="Decrease wean-to-service days">−</button>
@@ -536,7 +544,7 @@
     </div>
 
     <div>
-      <div class="section-label" style="margin-bottom:8px;">Add a breeding batch</div>
+      <div class="section-label" id="addBatchLabel" style="margin-bottom:8px;">Add a breeding batch</div>
       <div class="card" style="padding:14px; display:flex; flex-direction:column; gap:10px;">
         <div class="name-row">
           <input type="text" id="batchLabel" placeholder="e.g. Group A" maxlength="24">
@@ -550,7 +558,7 @@
     </div>
 
     <div>
-      <div class="section-label" style="margin-bottom:8px;">Breeding batches</div>
+      <div class="section-label" id="batchesLabel" style="margin-bottom:8px;">Breeding batches</div>
       <div class="preset-list" id="batchList"></div>
       <div class="empty-note" id="batchEmptyNote" hidden>No active batches — add a first-service date above to project farrowing and weaning on the calendar.</div>
     </div>
@@ -602,11 +610,150 @@
   }
   function saveJSON(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
 
-  var DAYNAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  var MONTHNAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  var MONTHSHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
   var COLORS = ["#e05a2b","#12897a","#b3791b","#2f6fa0","#8a4fb0","#3a8f8f","#5a5fc7","#c73434"];
+
+  // ---------- i18n ----------
+  var I18N = {
+    en: {
+      dayNames: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+      monthNames: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+      monthShort: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+      marks: { S:"S", F:"F", W:"W" },
+      s: {
+        tagline: "Gregorian calendar + the 1000-day pig production count",
+        today: "Today", todayPrefix: "Today: ",
+        jumpLabel: "Jump to cycle-day", go: "Go",
+        legendService: "Service / AI", legendFarrowing: "Farrowing", legendWeaning: "Weaning", legendFarrowingWindow: "Farrowing window",
+        settingsTitle: "Settings", settingsSubtitle: "Calendar display, the 1000-day count, and breeding batches.",
+        weekStartsOn: "Week starts on",
+        theme: "Theme", themeSystem: "System", themeLight: "Light", themeDark: "Dark",
+        language: "Language",
+        cycleCountSection: "1000-day count",
+        epochLabel: "Cycle 00 / Day 000 date", epochCaption: "Reference date the CC-DDD count starts from",
+        epochWarning: "⚠️ Changing this shifts the cycle-day (CC-DDD) label shown on every date across the whole calendar — it does not change any Gregorian dates or batches, only how days are numbered.",
+        epochConfirm: "Changing the Cycle 00 / Day 000 date will shift the cycle-day (CC-DDD) label shown on every date across the whole calendar.\n\nGregorian dates and saved batches are not affected — only how days are numbered.\n\nContinue?",
+        timingSection: "Breeding cycle timing",
+        gestationLabel: "Gestation", gestationCaption: "Service → farrowing",
+        windowLabel: "Farrowing window", windowCaption: "Days marked before/after the expected date",
+        lactationLabel: "Lactation", lactationCaption: "Farrowing → weaning",
+        wsiLabel: "Wean-to-service", wsiCaption: "Weaning → next service",
+        addBatchSection: "Add a breeding batch", batchPlaceholder: "e.g. Group A", add: "Add",
+        usedBy: "Already used by ", anotherBatch: "another batch",
+        batchesSection: "Breeding batches",
+        noActiveBatches: "No active batches — add a first-service date above to project farrowing and weaning on the calendar.",
+        historyLabel: "History",
+        deleteConfirm: "Delete?",
+        updateAvailable: "Update available.", refresh: "Refresh",
+        noEvents: "No breeding events on this day.", addBatchHere: "Add a batch starting here",
+        eventService: "Service", eventFarrowing: "Farrowing", eventWeaning: "Weaning",
+        statusService: "Service / AI", statusFarrowing: "Farrowing", statusWeaning: "Weaning",
+        statusGestationDay: "Day {n} of gestation", statusLactationDay: "Day {n} of lactation",
+        windowMarkDesc: "Possible farrowing (±{n}d window)", windowStatus: "Possible farrowing window ({n}d)",
+        batchDefaultName: "Batch",
+        ariaSwitchDark: "Switch to dark theme", ariaSwitchLight: "Switch to light theme",
+        ariaOpenSettings: "Open settings", ariaBackToCalendar: "Back to calendar",
+        ariaDeleteBatch: "Delete "
+      }
+    },
+    es: {
+      dayNames: ["dom","lun","mar","mié","jue","vie","sáb"],
+      monthNames: ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
+      monthShort: ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"],
+      marks: { S:"S", F:"P", W:"D" },
+      s: {
+        tagline: "Calendario gregoriano + el conteo de 1000 días de producción porcina",
+        today: "Hoy", todayPrefix: "Hoy: ",
+        jumpLabel: "Ir al día-ciclo", go: "Ir",
+        legendService: "Servicio / IA", legendFarrowing: "Parto", legendWeaning: "Destete", legendFarrowingWindow: "Ventana de parto",
+        settingsTitle: "Ajustes", settingsSubtitle: "Visualización del calendario, el conteo de 1000 días y los lotes de reproducción.",
+        weekStartsOn: "La semana comienza el",
+        theme: "Tema", themeSystem: "Sistema", themeLight: "Claro", themeDark: "Oscuro",
+        language: "Idioma",
+        cycleCountSection: "Conteo de 1000 días",
+        epochLabel: "Fecha del Ciclo 00 / Día 000", epochCaption: "Fecha de referencia desde la que empieza el conteo CC-DDD",
+        epochWarning: "⚠️ Cambiar esto desplaza la etiqueta de día-ciclo (CC-DDD) mostrada en cada fecha de todo el calendario — no cambia ninguna fecha gregoriana ni los lotes, solo cómo se numeran los días.",
+        epochConfirm: "Cambiar la fecha del Ciclo 00 / Día 000 desplazará la etiqueta de día-ciclo (CC-DDD) mostrada en cada fecha de todo el calendario.\n\nLas fechas gregorianas y los lotes guardados no se ven afectados — solo cómo se numeran los días.\n\n¿Continuar?",
+        timingSection: "Tiempos del ciclo reproductivo",
+        gestationLabel: "Gestación", gestationCaption: "Servicio → parto",
+        windowLabel: "Ventana de parto", windowCaption: "Días marcados antes/después de la fecha esperada",
+        lactationLabel: "Lactancia", lactationCaption: "Parto → destete",
+        wsiLabel: "Destete a servicio", wsiCaption: "Destete → próximo servicio",
+        addBatchSection: "Agregar un lote de reproducción", batchPlaceholder: "p. ej. Grupo A", add: "Agregar",
+        usedBy: "Ya usado por ", anotherBatch: "otro lote",
+        batchesSection: "Lotes de reproducción",
+        noActiveBatches: "No hay lotes activos — agrega una fecha de primer servicio arriba para proyectar el parto y el destete en el calendario.",
+        historyLabel: "Historial",
+        deleteConfirm: "¿Eliminar?",
+        updateAvailable: "Hay una actualización disponible.", refresh: "Actualizar",
+        noEvents: "No hay eventos reproductivos este día.", addBatchHere: "Agregar un lote que empiece aquí",
+        eventService: "Servicio", eventFarrowing: "Parto", eventWeaning: "Destete",
+        statusService: "Servicio / IA", statusFarrowing: "Parto", statusWeaning: "Destete",
+        statusGestationDay: "Día {n} de gestación", statusLactationDay: "Día {n} de lactancia",
+        windowMarkDesc: "Posible parto (ventana de ±{n}d)", windowStatus: "Posible ventana de parto ({n}d)",
+        batchDefaultName: "Lote",
+        ariaSwitchDark: "Cambiar a tema oscuro", ariaSwitchLight: "Cambiar a tema claro",
+        ariaOpenSettings: "Abrir ajustes", ariaBackToCalendar: "Volver al calendario",
+        ariaDeleteBatch: "Eliminar "
+      }
+    },
+    pt: {
+      dayNames: ["dom","seg","ter","qua","qui","sex","sáb"],
+      monthNames: ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"],
+      monthShort: ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"],
+      marks: { S:"S", F:"P", W:"D" },
+      s: {
+        tagline: "Calendário gregoriano + a contagem de 1000 dias da produção suína",
+        today: "Hoje", todayPrefix: "Hoje: ",
+        jumpLabel: "Ir para o dia-ciclo", go: "Ir",
+        legendService: "Serviço / IA", legendFarrowing: "Parto", legendWeaning: "Desmame", legendFarrowingWindow: "Janela de parto",
+        settingsTitle: "Configurações", settingsSubtitle: "Exibição do calendário, contagem de 1000 dias e lotes de reprodução.",
+        weekStartsOn: "A semana começa em",
+        theme: "Tema", themeSystem: "Sistema", themeLight: "Claro", themeDark: "Escuro",
+        language: "Idioma",
+        cycleCountSection: "Contagem de 1000 dias",
+        epochLabel: "Data do Ciclo 00 / Dia 000", epochCaption: "Data de referência a partir da qual a contagem CC-DDD começa",
+        epochWarning: "⚠️ Alterar isso desloca o rótulo de dia-ciclo (CC-DDD) exibido em cada data de todo o calendário — não altera nenhuma data gregoriana nem os lotes, apenas como os dias são numerados.",
+        epochConfirm: "Alterar a data do Ciclo 00 / Dia 000 vai deslocar o rótulo de dia-ciclo (CC-DDD) exibido em cada data de todo o calendário.\n\nAs datas gregorianas e os lotes salvos não são afetados — apenas como os dias são numerados.\n\nContinuar?",
+        timingSection: "Tempos do ciclo reprodutivo",
+        gestationLabel: "Gestação", gestationCaption: "Serviço → parto",
+        windowLabel: "Janela de parto", windowCaption: "Dias marcados antes/depois da data esperada",
+        lactationLabel: "Lactação", lactationCaption: "Parto → desmame",
+        wsiLabel: "Desmame ao serviço", wsiCaption: "Desmame → próximo serviço",
+        addBatchSection: "Adicionar um lote de reprodução", batchPlaceholder: "ex. Grupo A", add: "Adicionar",
+        usedBy: "Já usada por ", anotherBatch: "outro lote",
+        batchesSection: "Lotes de reprodução",
+        noActiveBatches: "Nenhum lote ativo — adicione uma data do primeiro serviço acima para projetar o parto e o desmame no calendário.",
+        historyLabel: "Histórico",
+        deleteConfirm: "Excluir?",
+        updateAvailable: "Atualização disponível.", refresh: "Atualizar",
+        noEvents: "Nenhum evento reprodutivo neste dia.", addBatchHere: "Adicionar um lote começando aqui",
+        eventService: "Serviço", eventFarrowing: "Parto", eventWeaning: "Desmame",
+        statusService: "Serviço / IA", statusFarrowing: "Parto", statusWeaning: "Desmame",
+        statusGestationDay: "Dia {n} de gestação", statusLactationDay: "Dia {n} de lactação",
+        windowMarkDesc: "Possível parto (janela de ±{n}d)", windowStatus: "Possível janela de parto ({n}d)",
+        batchDefaultName: "Lote",
+        ariaSwitchDark: "Mudar para tema escuro", ariaSwitchLight: "Mudar para tema claro",
+        ariaOpenSettings: "Abrir configurações", ariaBackToCalendar: "Voltar ao calendário",
+        ariaDeleteBatch: "Excluir "
+      }
+    }
+  };
+  var LANG_NAMES = [["en","English"],["es","Español"],["pt","Português"]];
+
+  function L() { return I18N[settings.lang] || I18N.en; }
+  function t(key) {
+    var v = L().s[key];
+    if (v === undefined) v = I18N.en.s[key];
+    return v === undefined ? key : v;
+  }
+  function tf(key, n) { return t(key).replace("{n}", n); }
+  function markLetter(type) { return (L().marks && L().marks[type]) || type; }
+  function detectDefaultLang() {
+    var nav = ((navigator.language || navigator.userLanguage || "en") + "").toLowerCase();
+    if (nav.indexOf("es") === 0) return "es";
+    if (nav.indexOf("pt") === 0) return "pt";
+    return "en";
+  }
 
   // Default epoch: inferred so that "today" reads as cycle-day 20-051, per the
   // reference calendar this app is matching. Adjust in Settings if your
@@ -621,7 +768,7 @@
   };
 
   function defaultSettings() {
-    return { weekStart: 1, theme: "system", epoch: DEFAULT_EPOCH, gestation: 114, gestationWindow: 3, lactation: 21, wsi: 5 };
+    return { weekStart: 1, theme: "system", lang: detectDefaultLang(), epoch: DEFAULT_EPOCH, gestation: 114, gestationWindow: 3, lactation: 21, wsi: 5 };
   }
   function clamp(val, field) {
     var l = LIMITS[field];
@@ -649,8 +796,9 @@
   }
   function weekdayOffset(dow, weekStart) { return (dow - weekStart + 7) % 7; }
   function orderedWeekdayLabels(weekStart) {
+    var names = L().dayNames;
     var out = [];
-    for (var i=0;i<7;i++) out.push(DAYNAMES[(weekStart+i)%7]);
+    for (var i=0;i<7;i++) out.push(names[(weekStart+i)%7]);
     return out;
   }
 
@@ -697,7 +845,7 @@
   function syncThemeToggleIcon() {
     var dark = effectiveDark();
     themeToggleIcon.innerHTML = dark ? SUN_ICON : MOON_ICON;
-    themeToggleBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+    themeToggleBtn.setAttribute("aria-label", dark ? t("ariaSwitchLight") : t("ariaSwitchDark"));
   }
   themeToggleBtn.addEventListener("click", function () {
     settings.theme = effectiveDark() ? "light" : "dark";
@@ -729,12 +877,12 @@
     settingsView.hidden = v !== "settings";
     if (v === "settings") {
       settingsIcon.innerHTML = BACK_ICON;
-      settingsBtn.setAttribute("aria-label", "Back to calendar");
+      settingsBtn.setAttribute("aria-label", t("ariaBackToCalendar"));
       topbarTitle.textContent = "1KDays";
       brandTagline.hidden = true;
     } else {
       settingsIcon.innerHTML = GEAR_ICON;
-      settingsBtn.setAttribute("aria-label", "Open settings");
+      settingsBtn.setAttribute("aria-label", t("ariaOpenSettings"));
       brandTagline.hidden = false;
       renderMonth();
     }
@@ -743,34 +891,36 @@
     showView(settingsView.hidden ? "settings" : "cal");
   });
 
-  // ---------- Settings view: week start + theme segmented controls ----------
+  // ---------- Settings view: week start + theme + language segmented controls ----------
   var weekStartRow = document.getElementById("weekStartRow");
-  DAYNAMES.forEach(function (name, idx) {
-    var b = document.createElement("button");
-    b.type = "button";
-    b.className = "seg-btn";
-    b.textContent = name;
-    b.addEventListener("click", function () {
-      settings.weekStart = idx;
-      persistSettings();
-      syncWeekStartRow();
-    });
-    weekStartRow.appendChild(b);
-  });
+  for (var wi = 0; wi < 7; wi++) {
+    (function (idx) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "seg-btn";
+      b.addEventListener("click", function () {
+        settings.weekStart = idx;
+        persistSettings();
+        syncWeekStartRow();
+      });
+      weekStartRow.appendChild(b);
+    })(wi);
+  }
   function syncWeekStartRow() {
+    var names = L().dayNames;
     Array.prototype.forEach.call(weekStartRow.children, function (btn, idx) {
+      btn.textContent = names[idx];
       btn.classList.toggle("active", idx === settings.weekStart);
     });
   }
 
   var themeRow = document.getElementById("themeRow");
-  [["system","System"],["light","Light"],["dark","Dark"]].forEach(function (pair) {
+  ["system","light","dark"].forEach(function (key) {
     var b = document.createElement("button");
     b.type = "button";
     b.className = "seg-btn";
-    b.textContent = pair[1];
     b.addEventListener("click", function () {
-      settings.theme = pair[0];
+      settings.theme = key;
       persistSettings();
       applyTheme();
       syncThemeRow();
@@ -779,8 +929,29 @@
     themeRow.appendChild(b);
   });
   function syncThemeRow() {
+    var labels = [t("themeSystem"), t("themeLight"), t("themeDark")];
     Array.prototype.forEach.call(themeRow.children, function (btn, idx) {
+      btn.textContent = labels[idx];
       btn.classList.toggle("active", ["system","light","dark"][idx] === settings.theme);
+    });
+  }
+
+  var langRow = document.getElementById("langRow");
+  LANG_NAMES.forEach(function (pair) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "seg-btn";
+    b.textContent = pair[1];
+    b.addEventListener("click", function () {
+      settings.lang = pair[0];
+      persistSettings();
+      applyLanguage();
+    });
+    langRow.appendChild(b);
+  });
+  function syncLangRow() {
+    Array.prototype.forEach.call(langRow.children, function (btn, idx) {
+      btn.classList.toggle("active", LANG_NAMES[idx][0] === settings.lang);
     });
   }
 
@@ -789,7 +960,7 @@
   epochInp.addEventListener("change", function () {
     var newVal = epochInp.value;
     if (!newVal || newVal === settings.epoch) return;
-    var ok = window.confirm("Changing the Cycle 00 / Day 000 date will shift the cycle-day (CC-DDD) label shown on every date across the whole calendar.\n\nGregorian dates and saved batches are not affected — only how days are numbered.\n\nContinue?");
+    var ok = window.confirm(t("epochConfirm"));
     if (!ok) { epochInp.value = settings.epoch; return; }
     settings.epoch = newVal;
     persistSettings();
@@ -872,7 +1043,7 @@
       btn.disabled = isUsed;
       if (isUsed) {
         var byBatch = activeBatches.filter(function (b) { return b.color === c; })[0];
-        btn.title = "Already used by " + (byBatch ? byBatch.label : "another batch");
+        btn.title = t("usedBy") + (byBatch ? byBatch.label : t("anotherBatch"));
       } else {
         btn.removeAttribute("title");
       }
@@ -882,11 +1053,12 @@
 
   var batchLabelInp = document.getElementById("batchLabel");
   var batchDateInp = document.getElementById("batchDate");
+  var addBatchBtn = document.getElementById("addBatchBtn");
   batchDateInp.value = isoDate(today);
 
-  document.getElementById("addBatchBtn").addEventListener("click", function () {
+  addBatchBtn.addEventListener("click", function () {
     var label = (batchLabelInp.value||"").trim();
-    if (!label) label = "Batch " + (batches.length+1);
+    if (!label) label = t("batchDefaultName") + " " + (batches.length+1);
     var dateVal = batchDateInp.value;
     if (!dateVal) return;
     batches.push({ id: "b"+Date.now()+Math.floor(Math.random()*1000), label: label, color: selectedColor, serviceDate: dateVal });
@@ -906,7 +1078,7 @@
     syncColorPicks();
   }
 
-  function fmtShort(dt) { return dt.getDate() + " " + MONTHSHORT[dt.getMonth()]; }
+  function fmtShort(dt) { return dt.getDate() + " " + L().monthShort[dt.getMonth()]; }
   function fmtShortWithCycle(dt) {
     var epoch = parseISO(settings.epoch);
     return fmtShort(dt) + " (" + cycleDayLabel(cycleDayIndex(epoch, dt)) + ")";
@@ -929,12 +1101,12 @@
     main.className = "preset-main";
     main.innerHTML = '<div class="pname"></div><div class="pmeta"></div>';
     main.querySelector(".pname").textContent = b.label;
-    main.querySelector(".pmeta").textContent = "S " + fmtShortWithCycle(c.service) + " · F " + fmtShortWithCycle(c.farrow) + " · W " + fmtShortWithCycle(c.wean);
+    main.querySelector(".pmeta").textContent = markLetter("S") + " " + fmtShortWithCycle(c.service) + " · " + markLetter("F") + " " + fmtShortWithCycle(c.farrow) + " · " + markLetter("W") + " " + fmtShortWithCycle(c.wean);
 
     var del = document.createElement("button");
     del.className = "preset-del";
     del.textContent = "✕";
-    del.setAttribute("aria-label", "Delete " + b.label);
+    del.setAttribute("aria-label", t("ariaDeleteBatch") + b.label);
     var confirmTimer = null;
     del.addEventListener("click", function () {
       if (del.classList.contains("confirm")) {
@@ -942,7 +1114,7 @@
         deleteBatch(b.id);
       } else {
         del.classList.add("confirm");
-        del.textContent = "Delete?";
+        del.textContent = t("deleteConfirm");
         confirmTimer = setTimeout(function () { del.classList.remove("confirm"); del.textContent = "✕"; }, 2500);
       }
     });
@@ -965,11 +1137,12 @@
     var history = batches.filter(isBatchCompleted);
 
     batchEmptyNote.hidden = active.length > 0;
+    batchEmptyNote.textContent = t("noActiveBatches");
     batchList.innerHTML = "";
     active.forEach(function (b) { batchList.appendChild(buildBatchCard(b, false)); });
 
     historySection.hidden = history.length === 0;
-    historyToggleLabel.textContent = "History (" + history.length + ")";
+    historyToggleLabel.textContent = t("historyLabel") + " (" + history.length + ")";
     historyList.innerHTML = "";
     history.forEach(function (b) { historyList.appendChild(buildBatchCard(b, true)); });
   }
@@ -992,13 +1165,16 @@
   function isBatchCompleted(batch) {
     return today.getTime() > batchCycle(batch).wean.getTime();
   }
-  function eventLabel(t) { return t==="S" ? "Service" : t==="F" ? "Farrowing" : "Weaning"; }
+  function eventLabel(type) {
+    return type==="S" ? t("eventService") : type==="F" ? t("eventFarrowing") : t("eventWeaning");
+  }
 
   // ---------- Calendar view (Gregorian + cycle-day) ----------
   var mTitle = document.getElementById("mTitle");
   var mWeekdays = document.getElementById("mWeekdays");
   var mGrid = document.getElementById("mGrid");
   var mCycleToday = document.getElementById("mCycleToday");
+  var mToday = document.getElementById("mToday");
 
   document.getElementById("mPrev").addEventListener("click", function () {
     monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth()-1, 1);
@@ -1008,7 +1184,7 @@
     monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth()+1, 1);
     renderMonth();
   });
-  document.getElementById("mToday").addEventListener("click", function () {
+  mToday.addEventListener("click", function () {
     monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
     renderMonth();
   });
@@ -1029,11 +1205,11 @@
   function renderMonth() {
     var epoch = parseISO(settings.epoch);
     var y = monthCursor.getFullYear(), m = monthCursor.getMonth();
-    mTitle.textContent = MONTHNAMES[m] + " " + y;
-    mCycleToday.innerHTML = "Today: <strong>" + cycleDayLabel(cycleDayIndex(epoch, today)) + "</strong>";
+    mTitle.textContent = L().monthNames[m] + " " + y;
+    mCycleToday.innerHTML = escapeHtml(t("todayPrefix")) + "<strong>" + cycleDayLabel(cycleDayIndex(epoch, today)) + "</strong>";
 
     var labels = orderedWeekdayLabels(settings.weekStart);
-    mWeekdays.innerHTML = labels.map(function (l) { return "<div>"+l+"</div>"; }).join("");
+    mWeekdays.innerHTML = labels.map(function (l) { return "<div>"+escapeHtml(l)+"</div>"; }).join("");
 
     var firstOfMonth = new Date(y,m,1);
     var firstCellOffset = weekdayOffset(firstOfMonth.getDay(), settings.weekStart);
@@ -1080,8 +1256,8 @@
       if (eventsByDate[key]) {
         marksHtml = '<div class="marks">' + eventsByDate[key].map(function (ev) {
           var cls = "mark" + (ev.faded ? " faded" : "");
-          var desc = ev.faded ? "Possible farrowing (±" + win + "d window)" : eventLabel(ev.type);
-          return '<span class="'+cls+'" style="background:'+ev.batch.color+'" title="'+escapeHtml(ev.batch.label)+' · '+desc+'">'+ev.type+'</span>';
+          var desc = ev.faded ? tf("windowMarkDesc", win) : eventLabel(ev.type);
+          return '<span class="'+cls+'" style="background:'+ev.batch.color+'" title="'+escapeHtml(ev.batch.label)+' · '+escapeHtml(desc)+'">'+markLetter(ev.type)+'</span>';
         }).join("") + '</div>';
       }
 
@@ -1134,40 +1310,43 @@
   var daySheetDate = document.getElementById("daySheetDate");
   var daySheetCycle = document.getElementById("daySheetCycle");
   var daySheetBody = document.getElementById("daySheetBody");
+  var currentSheetDate = null;
 
   function closeDaySheet() {
     sheetBackdrop.classList.remove("open");
     daySheet.classList.remove("open");
+    currentSheetDate = null;
   }
   document.getElementById("daySheetClose").addEventListener("click", closeDaySheet);
   sheetBackdrop.addEventListener("click", closeDaySheet);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDaySheet(); });
 
   function cycleStatus(cycle, date) {
-    if (isSameDay(date, cycle.service)) return "Service / AI";
-    if (isSameDay(date, cycle.farrow)) return "Farrowing";
-    if (isSameDay(date, cycle.wean)) return "Weaning";
+    if (isSameDay(date, cycle.service)) return t("statusService");
+    if (isSameDay(date, cycle.farrow)) return t("statusFarrowing");
+    if (isSameDay(date, cycle.wean)) return t("statusWeaning");
     var win = settings.gestationWindow;
     var offFarrow = daysBetween(cycle.farrow, date);
     if (win > 0 && Math.abs(offFarrow) <= win)
-      return "Possible farrowing window (" + (offFarrow > 0 ? "+" : "") + offFarrow + "d)";
+      return tf("windowStatus", (offFarrow > 0 ? "+" : "") + offFarrow);
     if (date.getTime() > cycle.service.getTime() && date.getTime() < cycle.farrow.getTime())
-      return "Day " + daysBetween(cycle.service, date) + " of gestation";
+      return tf("statusGestationDay", daysBetween(cycle.service, date));
     if (date.getTime() > cycle.farrow.getTime() && date.getTime() < cycle.wean.getTime())
-      return "Day " + daysBetween(cycle.farrow, date) + " of lactation";
+      return tf("statusLactationDay", daysBetween(cycle.farrow, date));
     return "";
   }
   function datesLine(cycle, date) {
-    function part(label, d) {
-      var txt = label + " " + fmtShortWithCycle(d);
+    function part(letter, d) {
+      var txt = letter + " " + fmtShortWithCycle(d);
       return isSameDay(date, d) ? "<strong>" + txt + "</strong>" : txt;
     }
-    return part("S", cycle.service) + " · " + part("F", cycle.farrow) + " · " + part("W", cycle.wean);
+    return part(markLetter("S"), cycle.service) + " · " + part(markLetter("F"), cycle.farrow) + " · " + part(markLetter("W"), cycle.wean);
   }
 
   function openDaySheet(date) {
+    currentSheetDate = date;
     var epoch = parseISO(settings.epoch);
-    daySheetDate.textContent = DAYNAMES[date.getDay()] + ", " + date.getDate() + " " + MONTHNAMES[date.getMonth()] + " " + date.getFullYear();
+    daySheetDate.textContent = L().dayNames[date.getDay()] + ", " + date.getDate() + " " + L().monthNames[date.getMonth()] + " " + date.getFullYear();
     daySheetCycle.textContent = cycleDayLabel(cycleDayIndex(epoch, date));
 
     var cycles = [];
@@ -1177,8 +1356,8 @@
     });
 
     if (cycles.length === 0) {
-      daySheetBody.innerHTML = '<div class="empty-note" style="padding:2px 2px 12px;">No breeding events on this day.</div>'
-        + '<button class="save-btn" id="daySheetAddBatch" style="width:100%; height:44px;">Add a batch starting here</button>';
+      daySheetBody.innerHTML = '<div class="empty-note" style="padding:2px 2px 12px;">'+escapeHtml(t("noEvents"))+'</div>'
+        + '<button class="save-btn" id="daySheetAddBatch" style="width:100%; height:44px;">'+escapeHtml(t("addBatchHere"))+'</button>';
       document.getElementById("daySheetAddBatch").addEventListener("click", function () {
         closeDaySheet();
         batchDateInp.value = isoDate(date);
@@ -1189,7 +1368,7 @@
       daySheetBody.innerHTML = cycles.map(function (c) {
         return '<div class="day-cycle-card">'
           + '<div class="day-cycle-top"><span class="swatch" style="background:'+c.batch.color+'"></span><span class="label">'+escapeHtml(c.batch.label)+'</span></div>'
-          + '<div class="day-cycle-status">'+cycleStatus(c, date)+'</div>'
+          + '<div class="day-cycle-status">'+escapeHtml(cycleStatus(c, date))+'</div>'
           + '<div class="day-cycle-dates">'+datesLine(c, date)+'</div>'
           + '</div>';
       }).join("");
@@ -1208,6 +1387,7 @@
   // when it changes, so a new version can be picked up without deleting
   // and re-adding the home-screen icon.
   var updateBanner = document.getElementById("updateBanner");
+  var updateBannerMsg = document.getElementById("updateBannerMsg");
   var updateRefreshBtn = document.getElementById("updateRefreshBtn");
   var updateDismissBtn = document.getElementById("updateDismissBtn");
   var knownVersionTag = null;
@@ -1239,11 +1419,75 @@
   });
   setInterval(checkForUpdate, 5 * 60 * 1000);
 
+  // ---------- apply language to all static text ----------
+  var staticEls = {
+    brandTagline: "tagline",
+    mToday: "today",
+    jumpLabel: "jumpLabel",
+    jumpGoBtn: "go",
+    legTextS: "legendService",
+    legTextF: "legendFarrowing",
+    legTextW: "legendWeaning",
+    legTextFwin: "legendFarrowingWindow",
+    settingsTitleText: "settingsTitle",
+    settingsSubtitleText: "settingsSubtitle",
+    weekStartsOnLabel: "weekStartsOn",
+    themeLabel: "theme",
+    languageLabel: "language",
+    cycleCountLabel: "cycleCountSection",
+    epochFieldLabel: "epochLabel",
+    epochFieldCaption: "epochCaption",
+    epochWarningText: "epochWarning",
+    timingLabel: "timingSection",
+    gestationFieldLabel: "gestationLabel",
+    gestationFieldCaption: "gestationCaption",
+    windowFieldLabel: "windowLabel",
+    windowFieldCaption: "windowCaption",
+    lactationFieldLabel: "lactationLabel",
+    lactationFieldCaption: "lactationCaption",
+    wsiFieldLabel: "wsiLabel",
+    wsiFieldCaption: "wsiCaption",
+    addBatchLabel: "addBatchSection",
+    addBatchBtn: "add",
+    batchesLabel: "batchesSection",
+    updateBannerMsg: "updateAvailable",
+    updateRefreshBtn: "refresh"
+  };
+  function applyStaticText() {
+    Object.keys(staticEls).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = t(staticEls[id]);
+    });
+    legIconS.textContent = markLetter("S");
+    legIconF.textContent = markLetter("F");
+    legIconW.textContent = markLetter("W");
+    legIconFwin.textContent = markLetter("F");
+    batchLabelInp.placeholder = t("batchPlaceholder");
+    document.documentElement.setAttribute("lang", settings.lang);
+  }
+  var legIconS = document.getElementById("legIconS");
+  var legIconF = document.getElementById("legIconF");
+  var legIconW = document.getElementById("legIconW");
+  var legIconFwin = document.getElementById("legIconFwin");
+
+  function applyLanguage() {
+    applyStaticText();
+    syncWeekStartRow();
+    syncThemeRow();
+    syncLangRow();
+    syncTimingFields();
+    renderBatchList();
+    renderMonth();
+    if (currentSheetDate) openDaySheet(currentSheetDate);
+  }
+
   // ---------- init ----------
   applyTheme();
   syncThemeToggleIcon();
+  applyStaticText();
   syncWeekStartRow();
   syncThemeRow();
+  syncLangRow();
   syncTimingFields();
   renderBatchList();
   renderMonth();
