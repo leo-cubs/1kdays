@@ -14,6 +14,7 @@ Single-file static app: `index.html`. No build step, no dependencies beyond a Go
 - **Batch history** — once a batch's weaning date passes, it's automatically archived out of the active list into a collapsible History section, freeing its color for reuse. Its dates keep showing correctly on the calendar wherever you browse back to them.
 - **Tap any day** to see its cycle-day and any breeding batch whose cycle covers it — service, farrowing, weaning, possible farrowing window, or "day N of gestation/lactation" — plus the full date set for that cycle.
 - Swipe left/right on the grid, or use the prev/next buttons, to change month.
+- **English / Español / Português** — full UI translation, including localized month/weekday names and the correct industry terms for the calendar marks (S/F/W in English, S/P/D — Servicio/Parto/Destete — in Spanish and Portuguese). Defaults to the browser's language, switches live.
 - Light/dark theme (system-aware, with a manual toggle), with settings and batches saved in the browser via `localStorage`.
 - Installable as a home-screen app; prompts to refresh when a new version is deployed.
 
