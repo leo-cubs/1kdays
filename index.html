@@ -350,6 +350,13 @@
   .preset-del.confirm { background: var(--danger); border-color: var(--danger); color: #fff; font-size: .68rem; font-weight: 700; width: auto; padding: 0 10px; }
   .empty-note { color: var(--muted); font-size: .82rem; padding: 6px 2px; }
 
+  .feedback-card {
+    padding: 14px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
+    font-size: .86rem; color: var(--muted); font-weight: 500;
+  }
+  .feedback-card a { color: var(--work); font-weight: 700; text-decoration: none; }
+  .feedback-card a:active { opacity: .7; }
+
   /* ---------- Update banner ---------- */
   .update-banner {
     flex: 0 0 auto;
@@ -570,6 +577,14 @@
       </button>
       <div class="preset-list" id="historyList" hidden></div>
     </div>
+
+    <div>
+      <div class="section-label" id="feedbackLabel" style="margin-bottom:8px;">Feedback</div>
+      <div class="card feedback-card">
+        <span id="feedbackText">Questions or suggestions?</span>
+        <a href="mailto:contact@cubicflows.com" id="feedbackEmail">contact@cubicflows.com</a>
+      </div>
+    </div>
   </main>
 
   <div class="update-banner" id="updateBanner" hidden>
@@ -652,7 +667,8 @@
         batchDefaultName: "Batch",
         ariaSwitchDark: "Switch to dark theme", ariaSwitchLight: "Switch to light theme",
         ariaOpenSettings: "Open settings", ariaBackToCalendar: "Back to calendar",
-        ariaDeleteBatch: "Delete "
+        ariaDeleteBatch: "Delete ",
+        feedbackSection: "Feedback", feedbackText: "Questions or suggestions?"
       }
     },
     es: {
@@ -693,7 +709,8 @@
         batchDefaultName: "Lote",
         ariaSwitchDark: "Cambiar a tema oscuro", ariaSwitchLight: "Cambiar a tema claro",
         ariaOpenSettings: "Abrir ajustes", ariaBackToCalendar: "Volver al calendario",
-        ariaDeleteBatch: "Eliminar "
+        ariaDeleteBatch: "Eliminar ",
+        feedbackSection: "Comentarios", feedbackText: "¿Preguntas o sugerencias?"
       }
     },
     pt: {
@@ -734,7 +751,8 @@
         batchDefaultName: "Lote",
         ariaSwitchDark: "Mudar para tema escuro", ariaSwitchLight: "Mudar para tema claro",
         ariaOpenSettings: "Abrir configurações", ariaBackToCalendar: "Voltar ao calendário",
-        ariaDeleteBatch: "Excluir "
+        ariaDeleteBatch: "Excluir ",
+        feedbackSection: "Feedback", feedbackText: "Dúvidas ou sugestões?"
       }
     }
   };
@@ -1450,6 +1468,8 @@
     addBatchLabel: "addBatchSection",
     addBatchBtn: "add",
     batchesLabel: "batchesSection",
+    feedbackLabel: "feedbackSection",
+    feedbackText: "feedbackText",
     updateBannerMsg: "updateAvailable",
     updateRefreshBtn: "refresh"
   };
