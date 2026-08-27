@@ -358,6 +358,7 @@
   .feedback-card a:active { opacity: .7; }
 
   .app-footer { text-align: center; font-size: .66rem; color: var(--muted); opacity: .55; padding: 6px 4px 2px; }
+  .app-footer a { color: inherit; text-decoration: underline; }
 
   /* ---------- Update banner ---------- */
   .update-banner {
@@ -675,7 +676,7 @@
         ariaOpenSettings: "Open settings", ariaBackToCalendar: "Back to calendar",
         ariaDeleteBatch: "Delete ",
         feedbackSection: "Feedback", feedbackText: "Questions or suggestions?",
-        footerText: "Powered by cubicFLOWS, a trademark of MAN&Cubs."
+        footerText: "Powered by {link}, a trademark of MAN&Cubs."
       }
     },
     es: {
@@ -718,7 +719,7 @@
         ariaOpenSettings: "Abrir ajustes", ariaBackToCalendar: "Volver al calendario",
         ariaDeleteBatch: "Eliminar ",
         feedbackSection: "Comentarios", feedbackText: "¿Preguntas o sugerencias?",
-        footerText: "Desarrollado por cubicFLOWS, una marca registrada de MAN&Cubs."
+        footerText: "Desarrollado por {link}, una marca registrada de MAN&Cubs."
       }
     },
     pt: {
@@ -761,7 +762,7 @@
         ariaOpenSettings: "Abrir configurações", ariaBackToCalendar: "Voltar ao calendário",
         ariaDeleteBatch: "Excluir ",
         feedbackSection: "Feedback", feedbackText: "Dúvidas ou sugestões?",
-        footerText: "Desenvolvido por cubicFLOWS, uma marca registrada da MAN&Cubs."
+        footerText: "Desenvolvido por {link}, uma marca registrada da MAN&Cubs."
       }
     }
   };
@@ -1479,16 +1480,18 @@
     batchesLabel: "batchesSection",
     feedbackLabel: "feedbackSection",
     feedbackText: "feedbackText",
-    footerCal: "footerText",
-    footerSettings: "footerText",
     updateBannerMsg: "updateAvailable",
     updateRefreshBtn: "refresh"
   };
+  var FOOTER_LINK = '<a href="https://cubicflows.com" target="_blank" rel="noopener noreferrer">cubicFLOWS</a>';
   function applyStaticText() {
     Object.keys(staticEls).forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.textContent = t(staticEls[id]);
     });
+    var footerHtml = escapeHtml(t("footerText")).replace("{link}", FOOTER_LINK);
+    document.getElementById("footerCal").innerHTML = footerHtml;
+    document.getElementById("footerSettings").innerHTML = footerHtml;
     legIconS.textContent = markLetter("S");
     legIconF.textContent = markLetter("F");
     legIconW.textContent = markLetter("W");
