@@ -357,6 +357,8 @@
   .feedback-card a { color: var(--work); font-weight: 700; text-decoration: none; }
   .feedback-card a:active { opacity: .7; }
 
+  .app-footer { text-align: center; font-size: .66rem; color: var(--muted); opacity: .55; padding: 6px 4px 2px; }
+
   /* ---------- Update banner ---------- */
   .update-banner {
     flex: 0 0 auto;
@@ -457,6 +459,8 @@
       <span class="leg"><i id="legIconW">W</i><span id="legTextW">Weaning</span></span>
       <span class="leg"><i class="faded" id="legIconFwin">F</i><span id="legTextFwin">Farrowing window</span></span>
     </div>
+
+    <div class="app-footer" id="footerCal">Powered by cubicFLOWS, a trademark of MAN&amp;Cubs.</div>
   </main>
 
   <main class="view settings-view" id="settingsView" hidden>
@@ -585,6 +589,8 @@
         <a href="mailto:contact@cubicflows.com" id="feedbackEmail">contact@cubicflows.com</a>
       </div>
     </div>
+
+    <div class="app-footer" id="footerSettings">Powered by cubicFLOWS, a trademark of MAN&amp;Cubs.</div>
   </main>
 
   <div class="update-banner" id="updateBanner" hidden>
@@ -668,7 +674,8 @@
         ariaSwitchDark: "Switch to dark theme", ariaSwitchLight: "Switch to light theme",
         ariaOpenSettings: "Open settings", ariaBackToCalendar: "Back to calendar",
         ariaDeleteBatch: "Delete ",
-        feedbackSection: "Feedback", feedbackText: "Questions or suggestions?"
+        feedbackSection: "Feedback", feedbackText: "Questions or suggestions?",
+        footerText: "Powered by cubicFLOWS, a trademark of MAN&Cubs."
       }
     },
     es: {
@@ -710,7 +717,8 @@
         ariaSwitchDark: "Cambiar a tema oscuro", ariaSwitchLight: "Cambiar a tema claro",
         ariaOpenSettings: "Abrir ajustes", ariaBackToCalendar: "Volver al calendario",
         ariaDeleteBatch: "Eliminar ",
-        feedbackSection: "Comentarios", feedbackText: "¿Preguntas o sugerencias?"
+        feedbackSection: "Comentarios", feedbackText: "¿Preguntas o sugerencias?",
+        footerText: "Desarrollado por cubicFLOWS, una marca registrada de MAN&Cubs."
       }
     },
     pt: {
@@ -752,7 +760,8 @@
         ariaSwitchDark: "Mudar para tema escuro", ariaSwitchLight: "Mudar para tema claro",
         ariaOpenSettings: "Abrir configurações", ariaBackToCalendar: "Voltar ao calendário",
         ariaDeleteBatch: "Excluir ",
-        feedbackSection: "Feedback", feedbackText: "Dúvidas ou sugestões?"
+        feedbackSection: "Feedback", feedbackText: "Dúvidas ou sugestões?",
+        footerText: "Desenvolvido por cubicFLOWS, uma marca registrada da MAN&Cubs."
       }
     }
   };
@@ -1470,6 +1479,8 @@
     batchesLabel: "batchesSection",
     feedbackLabel: "feedbackSection",
     feedbackText: "feedbackText",
+    footerCal: "footerText",
+    footerSettings: "footerText",
     updateBannerMsg: "updateAvailable",
     updateRefreshBtn: "refresh"
   };
